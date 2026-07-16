@@ -1,0 +1,292 @@
+Agora faça um livro em pdf baseado no txt enviado, apresentando o sistema e o módulo introdutório (The Forgotten Vault). Deixe elegante e profissional, com ambientação narrativa, índices, fichas e tabelas para jogar em mesa, além de dicas para GM's e jogo solo.
+
+Exemplo de filosofia e manifesto (em português no livro a ser gerado):
+"""
+The DELVE6 Philosophy
+
+Rules should be learned in minutes.
+
+Adventures should emerge through play.
+
+Every Delve should be easy to create, modify and share.
+
+Player choices matter more than character builds.
+
+The system is a toolbox, not a script.
+"""
+
+
+
+DELVE6 CORE
+
+Um dado.
+Uma chance.
+Caminhos infinitos.
+
+ OSR ultraminimalista com geração procedural de masmorras. Onde o mínimo de recurso a ser utilizado é um dado de seis lados, papel e caneta, facilitando campanhas solo.
+
+
+ MANIFESTO DO SISTEMA:
+
+ 1 - Um único dado.
+ 2 - Regras mínimas.
+ 3 - Geração procedural.
+ 4 - Improvisação acima de preparação.
+ 5 - Todo módulo pode ser modificado. "Delves" novas podem ser criadas.
+ 6 - O mestre é opcional.
+
+ O livro fornece ferramentas, não histórias prontas.
+
+
+########## DELVES ###########
+
+ O QUE É "DELVE"?
+
+ Etimologia
+
+O verbo to delve vem do inglês antigo delfan, que significava:
+
+- cavar;
+- escavar;
+- abrir um buraco na terra.
+
+Esse termo vem do proto-germânico delbaną, relacionado à ideia de escavação.
+
+Com o passar dos séculos, o significado evoluiu.
+
+Hoje, "to delve" pode significar:
+
+- explorar cuidadosamente;
+- investigar profundamente;
+- mergulhar em um assunto;
+- aventurar-se em um lugar desconhecido.
+
+
+ Aqui uma Delve é uma unidade de aventura no substantivo. Qualquer ambiente procedural criado para exploração usando o DELVE6 CORE.
+
+ Uma Delve pode ser:
+
+- uma masmorra;
+- uma mina;
+- uma fortaleza;
+- uma floresta amaldiçoada;
+- um navio fantasma;
+- uma estação espacial;
+- um bunker nuclear;
+- um laboratório secreto;
+- uma cidade abandonada.
+
+Todos continuam sendo "Delves" para denominar um "aprofundamento" procedural.
+
+ CRIE O SEU DELVE (Deepening - Aprofundamento):
+ Você pode criar módulos, cenários, monstros, classes, campanhas e adaptações para DELVE6 CORE livremente e gratuitamente. Créditos são apreciados, mas não obrigatórios. Faça algo interessante.
+
+ Lembrete: O sistema é livre para modificações, expansões e reinterpretações, no entanto a premissa original é usar apenas um dado de seis lados, então expandir o sistema de forma desordenada pode demandar o uso de mais dados, embora também seja permitido.
+
+ Hack it. Expand it. Publish it.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  GERADOR DE DUNGEON: Algoritmo para geração procedural de masmorra de "The Forgotten Vault". Não inclui sistema de retorno à superfície, loja, acampamento, etc.
+
+INÍCIO
+ 1 - entrada fixa
+
+ 2 - d6 para gerar: saguão, corredor, hub, escadaria abaixo, poço com corda, elevador para baixo
+
+ 3 - d6 para gerar: passagem ao fundo, porta de madeira, porta de madeira trancada (CA5), porta de ferro trancada (CA8), portão rúnico (exige inserção de três jóias), ou uma bifurcação (role d6 novamente para determinar cada passagem da bifurcação). "Explorar outra rota ás cegas" só é possível uma única vez por sala, exceto na sala da entrada em casos de bloqueio total de rotas (critério do jogador ou GM).
+
+ 4 - d6 para novas áreas: corredor circular, corredor sem saída, escada espiral, corredor com armadilhas (teste AGL + d6 vs DR7 para evitar), sala escura (desvantagem sem tocha em todos os modificadores e testes dentro da sala), e prisão
+
+ 5 - d6 para gerar um evento
+        1) encontro com guarda esqueleto
+        2) encontro com kobold
+        3) nada acontece
+        4) encontra ouro (d6)
+        5) encontra 1 consumível
+        6) encontra 1 jóia (amarelo, vermelho ou azul).
+
+    Recompensa ao vencer luta: Um item do inimigo derrotado + d6 novamente para gerar evento (loot ou encontro inimigo). Se a sala for escura, é necessário acender tocha para conseguir coletar itens, caso haja algum.
+
+ 6 - Repetir passos 3, 4 e 5 para cada exploração às cegas, até o jogador conseguir abrir o portão rúnico. Voltar para salas já exploradas é permitido mas um d6 determina
+ surgimento de inimigos (valor baixo)
+
+ Limite para explorar ás cegas na mesma sala:
+ "Explorar OUTRA DIREÇÃO ás cegas" só é possível uma única vez por sala, exceto se for a partir da ENTRADA. Se for sala escura só é possível explorar uma nova rota com tocha acesa.
+
+ 7 - Enfrentar o chefe (Ciclope) para alcançar o Tesouro e sair da masmorra
+FIM
+
+
+############ ALGUMAS REGRAS CENTRAIS ###############
+
+ MOVIMENTAÇÃO: Mover só é permitido em salas adjacentes. Revisitar salas rola d6, e os valores mais baixos retornam encontros com inimigos comuns (Ex: 1 = kobold, 2 = Guarda Esqueleto).
+
+ TOCHAS E SALAS ESCURAS: Acender tochas (durabilidade d6 salas/movimentações) em salas escuras que indicam "algo brilhando" retorna coleta de algum item (consumível, ou jóia: d6, 1-3 consumível, 4-6 jóia)
+
+ COLETAR JÓIAS: Apenas uma jóia de cada cor coletável (amarela, azul e vermelha). Notifique narrativamente quando encontrar uma jóia.
+
+ PORTAS TRANCADAS: Além de usar lockpicks (AGL vs CA da porta), arrombar com força bruta (FOR vs CA da porta) é permitido, mas rola d6 de dano como punição.
+
+
+########### EDITAR E CRIAR DELVES ############
+
+ HACKS: Altere elementos do algoritmo para criar novas masmorras.
+
+ GM: Mestres podem gerar e desenhar masmorras antecipadamente, e interpretá-las livremente, antes e durante uma sessão.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+##################The Forgotten Vault###########################
+
+Uma masmorra esquecida.
+Uma fortuna perdida.
+Uma única saída.
+
+--------------------------------------------------------------------------------
+
+ CLASSES: Escolha uma classe pré-definida ou crie classes customizadas.
+
+ 6 pré-definidas: Cada uma com uma perk/habilidade própria.
+
+
+ Bárbaro: Fúria de Sangue - Quando seu PV cai para metade (ou menos) do máximo, seus ataques corpo a corpo causam +2 de dano.
+
+ Cavaleiro: Guarda de Aço - rola um dado d6 que aumenta o CA até o próximo turno, e além disso se esse d6 for igual ao d6 do próximo ataque inimigo o Cavaleiro contra-ataca passivamente. Se d6 for 6, anula acerto crítico do inimigo.
+
+ Mago Elemental: Conjure d6 + PRE de dano em um inimigo, ignorando armadura. Recarrega em 3 turnos ou salas caminhadas. Futuramente - se d6 = 1 magia falha e penaliza.
+
+ Warlock: Pacto Sombrio - próximo ataque terá vantagem (anula desvantagem na escuridão), e um crítico inimigo (d6=6) nesse meio-tempo será anulado. Recarrega em 3 turnos ou salas caminhadas.
+
+ Ladino: Golpe Furtivo - O primeiro ataque de cada combate rola vantagem (2d6, usa o maior) para acertar. Começa com um frasco de veneno raro.
+
+ Caçador: Mira Certeira - Ataques com Arco nunca erram e causam +1 de dano fixo.
+
+-------------------------------------------------------------------------------
+
+ MODIFICADORES:
+
+    FOR - Determina dano base de ataques e testes de força
+
+    AGL - Determina CA base (esquiva) e chance de acertar ataques, entre outros testes de agilidade
+
+    PRE - Presença, determina carisma, coragem, inteligência, e claro... poder mágico
+
+    DUR - Dureza, determina pontos de vida (DUR + D6)
+
+
+ Distribua entre os quatro modificadores quatro valores iniciais sem repetição (0, 1, 2, 3)
+
+    Exemplo: FOR 3, AGL 1, PRE 0, DUR 2
+
+
+ Pontos de vida: PV = DUR + d6
+
+ Classe de Armadura: CA = AGL + d6 (considere modificadores em armaduras ou vestimentas em cálculos futuros para AGL total)
+
+ ---------------------------------------------------------------
+
+ EQUIPAMENTOS: Após escolher classe e definir modificadores, escolha o equipamento inicial.
+
+ Armas:
+
+ - Desarmado: Apenas dano base (FOR)
+ - Cajado: dano(d6 + 0)
+ - Adaga: dano (d6 + 1)
+ - Espada Curta: dano (d6 + 2)
+ - Espada Longa: dano (d6 + 3), mas exige que força seja >= 2
+ - Martelo de Guerra: (d6 + 4), mas exige que força seja >= 3
+ - Arco: (d6 + 1), duplica rolagem de dano quando crítico (d6 = 6) e usa o maior dado, exige agilidade >= 2
+
+
+ Armaduras:
+
+ - Capuz: -0 dano · +2 AGL
+ - Armadura de couro: reduz 1 de dano inimigo (-d1) · +1 AGL
+ - Armadura Bárbara: reduz 2 de dano inimigo (-d2)
+ - Armadura de Placa: reduz 3 de dano inimigo (-d3) mas custa agilidade do personagem (-1 AGL) e exige força >= 2
+
+---------------------------------------------------------------------------------------------
+ Complementos de build: Opcional, recomendado para hacks e versões extendidas.
+
+ Mãos: 1 por vez (ex: manoplas)
+ Pés: 1 por vez (ex: Botas)
+ Cabeça: 1 por vez (ex: Elmo)
+
+ Anéis: até 4
+ Colares: até 1
+ Talismãs: até 1
+---------------------------------------------------------------------------------------------
+
+ Consumíveis:
+
+ Coquetel Verde: Cura 1 + d6 de vida
+ Lockpick (2): Testa AGL para abrir portas sem forçar (gasta 1 ao usar)
+ Tocha: Reduz desvantagem em salas escuras e revela itens ocultados, gasta ao se mover entre salas. Durabilidade definida em d6
+
+ Veneno (Ladino): Imbui na arma equipada e aplica veneno após causar dano, consome 1 PV por turno. Uma armadura espessa pode impedir a aplicação de veneno.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+ INIMIGOS:
+
+ Guarda Esqueleto: Imune a veneno e remonta com metade da vida total (+1 se for ímpar) após tombar
+ FOR: 2
+ AGL: 2
+ PRE: 1
+ DUR: 3
+ PV: dur + d6
+ CA: agl + d6
+ Equipamento: Espada Enferrujada (d6 + 1) e Armadura Enferrujada (-d1)
+
+
+ Kobold: Chance de parry (1 em 6) passivo, anula dano e contra-ataca com teste vs CA
+ FOR: 2
+ AGL: 3
+ PRE: 1
+ DUR: 0
+ PV: dur + d6
+ CA: agl + d6
+ Equipamento: Escudo de Madeira (-d1) e Maça (d6 + 2)
+
+
+ Ciclope (chefe): Chance de 1 em 6 do grito amedrontar e cancelar 1 turno do jogador (teste de PRE para resistir).
+ FOR: 3
+ AGL: 1
+ PRE: 3
+ DUR: 6
+ PV: dur + d6
+ CA: agl + d6
+ Equipamento: Martelo de Guerra e Capuz
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+COMBATE:
+
+- Fórmula de ataque (acerto): AGL + d6 vs DR (d6 sinaliza acerto crítico, ignora DR e armadura ao aplicar dano)
+
+- Fórmula para dano: FOR + d6 + n(arma) - armadura inimiga
+
+- Iniciativa em caso de encontros e evento pós-combate: Role d6. Se > 3 o jogador age primeiro, se <= 3 o inimigo age primeiro.
+
+- Recompensa e evento ao vencer luta: Um item do inimigo derrotado + d6 novamente para gerar novo evento (loot de item só é possível com tocha acesa se a sala estiver escura).
+
+- Lutar no escuro aplica condição de desvantagem (dois d6, usa o menor) em rolagem de ataques. Acender tochas durante combate gasta 1 turno inteiro.
+
+- Usar consumível gasta 1 turno.
+
+- Fugir testa AGL vs CA inimiga.
+
+
+
+VENENO: Ladino começa com um novo item "Veneno Raro". Ao usar imbui na arma equipada e após aplicar dano o veneno consome 1 PV por turno. Guarda Esqueleto é imune a esse efeito.
+
+Não é permitido usar veneno em Cajados e Martelos, e com arco o efeito se vai em caso de erro (o veneno se foi junto a flecha). E a condicional para aplicar veneno não é o acerto, mas sim dano causado (se penetrar armadura).
+
+
+MAGO: Rajada Elemental d6 = 1 falha e pune com 1 de vida.
+
+
+
