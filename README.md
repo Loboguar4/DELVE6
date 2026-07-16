@@ -27,8 +27,8 @@ DELVE6 foi desenhado para **campanhas solo**: o mínimo de recurso necessário p
 
 | Arquivo | O que é |
 |---|---|
-| [`d6.txt`](./d6.txt) | O livro de regras core: manifesto, gerador de masmorra, classes, combate, itens e inimigos. |
-| [`delve6.html`](./delve6.html) | Implementação jogável de *The Forgotten Vault* — um crawler de masmorra completo, rodando inteiramente no navegador. |
+| [`d6.txt`](./delve6.txt) | O livro de regras core: manifesto, gerador de masmorra, classes, combate, itens e inimigos. |
+| [`delve6.html`](./index.html) | Implementação jogável de *The Forgotten Vault* — um crawler de masmorra completo, rodando inteiramente no navegador. |
 | `README.md` | Este documento. |
 | `LICENSE` | Licença MIT. |
 
@@ -64,7 +64,7 @@ A interface é organizada em **janelas independentes** — Ficha, Mapa da Masmor
 
 ## Regras principais (resumo)
 
-Para as regras completas e o texto original, veja [`d6.txt`](./d6.txt). Resumo de referência rápida:
+Para as regras completas e o texto original, veja [`d6.txt`](./delve6.txt). Resumo de referência rápida:
 
 ### Atributos
 
