@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>DELVE6 — The Forgotten Vault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#0b0b0a;
+  --panel:#151310;
+  --panel2:#1b1815;
+  --line:#332f28;
+  --acid:#d7ff3d;
+  --blood:#e8342a;
+  --bone:#e9e4d3;
+  --dim:#948d78;
+  --blue:#3da9ff;
+  --purple:#b98bf0;
+  --orange:#ff9a3d;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--bone);font-family:'IBM Plex Mono',monospace;}
+body{min-height:100vh;}
+::selection{background:var(--acid);color:#000;}
+
+.title-font{font-family:'Anton',sans-serif;letter-spacing:.03em;text-transform:uppercase;}
+
+#app{max-width:1180px;margin:0 auto;padding:18px 14px 90px;}
+
+header.hero{
+  border-bottom:3px solid var(--acid);
+  padding-bottom:14px;margin-bottom:18px;
+  display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;
+}
+header.hero h3{
+  font-size:clamp(18px,5vw,22px);margin:0;line-height:.9;color:var(--acid);
+  transform:skewX(-3deg);
+}
+header.hero h3 span{color:var(--bone);}
+header.hero .tag{color:var(--dim);font-size:12px;letter-spacing:.15em;text-transform:uppercase;}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  padding:16px;
+  position:relative;
+}
+.panel::before{
+  content:attr(data-label);
+  position:absolute;top:-11px;left:12px;
+  background:var(--bg);
+  padding:0 8px;
+  font-family:'Anton',sans-serif;
+  letter-spacing:.08em;
+  font-size:12px;
+  color:var(--acid);
+  text-transform:uppercase;
+}
+
+/* ---------- setup ---------- */
+#setup{display:grid;gap:16px;}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;}
+.class-card{
+  border:1px solid var(--line);background:var(--panel2);padding:12px;cursor:pointer;
+  transition:border-color .15s, transform .1s;
+}
+.class-card:hover{border-color:var(--acid);}
+.class-card.selected{border-color:var(--acid);box-shadow:0 0 0 1px var(--acid) inset;}
+.class-card h3{margin:0 0 6px;color:var(--acid);font-family:'Anton',sans-serif;letter-spacing:.03em;font-size:18px;}
+.class-card p{margin:0;font-size:12.5px;color:var(--dim);line-height:1.4;}
+.class-card p.perk{color:var(--bone);margin-top:6px;}
+.class-card p.perk b{color:var(--blue);}
+
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px;}
+.stat-box{background:var(--panel2);border:1px solid var(--line);padding:10px;text-align:center;}
+.stat-box label{display:block;font-size:11px;color:var(--dim);letter-spacing:.1em;margin-bottom:6px;}
+.stat-box select{
+  width:100%;background:var(--bg);color:var(--acid);border:1px solid var(--line);
+  font-family:'IBM Plex Mono';font-weight:700;font-size:18px;padding:4px;text-align:center;
+}
+
+.equip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px;}
+.equip-card{border:1px solid var(--line);background:var(--panel2);padding:8px;cursor:pointer;font-size:11.5px;}
+.equip-card b{display:block;color:var(--bone);font-size:12.5px;margin-bottom:2px;}
+.equip-card .mod{color:var(--acid);font-size:11px;}
+.equip-card .req{color:var(--blood);font-size:10px;margin-top:2px;}
+.equip-card.selected{border-color:var(--acid);box-shadow:0 0 0 1px var(--acid) inset;}
+.equip-card.locked{opacity:.4;cursor:not-allowed;}
+.equip-subtitle{font-size:11px;color:var(--dim);letter-spacing:.05em;margin:12px 0 4px;}
+.equip-subtitle:first-child{margin-top:0;}
+
+button{
+  font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.03em;
+  background:var(--acid);color:#0b0b0a;border:none;padding:10px 16px;cursor:pointer;
+  text-transform:uppercase;font-size:12.5px;
+}
+button:hover{background:#e8ff7a;}
+button:disabled{background:var(--line);color:var(--dim);cursor:not-allowed;}
+button.secondary{background:transparent;color:var(--bone);border:1px solid var(--line);}
+button.secondary:hover{border-color:var(--acid);color:var(--acid);}
+button.danger{background:var(--blood);color:#fff;}
+button.danger:hover{background:#ff5a4f;}
+button.small{padding:4px 8px;font-size:10.5px;}
+
+/* ---------- game layout: draggable window system ---------- */
+#desktop{position:relative; min-height:820px;}
+@media(max-width:900px){ #desktop{min-height:0;} }
+
+.win{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:0 10px 28px rgba(0,0,0,.55);
+  overflow:auto;
+  resize:both;
+  min-width:230px;
+  min-height:110px;
+}
+.win.minimized{
+  height:auto !important;
+  min-height:0;
+  resize:none;
+  overflow:visible;
+}
+.win.minimized .win-body{display:none;}
+
+.win-titlebar{
+  background:var(--panel2);
+  border-bottom:1px solid var(--line);
+  padding:7px 8px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  cursor:move;
+  user-select:none;
+  touch-action:none;
+  flex:0 0 auto;
+}
+.win-title{
+  font-family:'Anton',sans-serif;letter-spacing:.07em;text-transform:uppercase;
+  font-size:11.5px;color:var(--acid);
+}
+.win-min{
+  background:transparent;border:1px solid var(--line);color:var(--bone);
+  width:20px;height:20px;min-width:0;padding:0;line-height:1;font-size:14px;
+  cursor:pointer;text-transform:none;letter-spacing:0;
+}
+.win-min:hover{border-color:var(--acid);color:var(--acid);background:transparent;}
+
+.win-body{
+  padding:14px;
+  overflow:auto;
+  flex:1 1 auto;
+}
+
+#taskbar{
+  position:fixed; left:0; right:0; bottom:0;
+  background:var(--panel2); border-top:1px solid var(--line);
+  display:flex; gap:8px; padding:6px 10px; flex-wrap:wrap;
+  z-index:99999;
+}
+#taskbar:empty{display:none;}
+.taskbar-item{
+  background:var(--panel); border:1px solid var(--line); color:var(--bone);
+  padding:4px 10px; font-size:10.5px; cursor:pointer; letter-spacing:.03em;
+}
+.taskbar-item:hover{border-color:var(--acid); color:var(--acid);}
+
+#sheet{font-size:12.5px;}
+#sheet h2{font-family:'Anton',sans-serif;color:var(--acid);font-size:16px;margin:0 0 10px;}
+.sheet-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dotted var(--line);}
+.sheet-row b{color:var(--bone);}
+.bar-wrap{background:var(--panel2);border:1px solid var(--line);height:16px;margin:6px 0 12px;position:relative;}
+.bar-fill{height:100%;background:var(--blood);transition:width .3s;}
+.bar-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--bone);}
+.tag-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.tag-list span{background:var(--panel2);border:1px solid var(--line);padding:2px 6px;font-size:11px;}
+.jewel{font-size:14px;}
+
+.inv-section-title{margin-top:14px;font-size:11px;color:var(--dim);letter-spacing:.05em;display:flex;justify-content:space-between;}
+.inv-row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 0;border-bottom:1px dotted var(--line);font-size:11.5px;}
+.inv-row .name{flex:1;}
+.inv-row .btns{display:flex;gap:4px;}
+
+#room-panel .room-title{font-family:'Anton',sans-serif;color:var(--acid);font-size:20px;margin:0 0 8px;}
+#room-panel p{line-height:1.55;font-size:13.5px;color:var(--bone);}
+#room-panel p.flavor{color:var(--dim);}
+
+#actions{display:flex;flex-wrap:wrap;gap:8px;}
+
+#map-card svg{display:block;}
+#map-card .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:10.5px;color:var(--dim);}
+#map-card .legend span{display:inline-flex;align-items:center;gap:4px;}
+#map-card .legend i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+#combat{display:none;}
+#combat.active{display:block;}
+.combat-vs{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:14px;flex-wrap:wrap;}
+.enemy-box{flex:1;min-width:200px;}
+.enemy-box h3{margin:0 0 4px;color:var(--blood);font-family:'Anton',sans-serif;letter-spacing:.02em;}
+.vs-mark{font-family:'Anton',sans-serif;color:var(--dim);font-size:22px;}
+
+/* dice */
+.die{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;font-size:22px;color:var(--acid);
+  animation:tumble .4s ease-out;
+}
+@keyframes tumble{
+  0%{transform:rotate(-90deg) scale(.4);opacity:0;}
+  60%{transform:rotate(20deg) scale(1.15);opacity:1;}
+  100%{transform:rotate(0) scale(1);}
+}
+.die.bad{color:var(--blood);}
+.die.crit{color:var(--blue);}
+
+#log{
+  max-height:280px;overflow-y:auto;font-size:12.5px;
+  display:flex;flex-direction:column;gap:5px;
+  border-top:1px dashed var(--line);padding-top:10px;margin-top:6px;
+  scroll-behavior:smooth;
+}
+#log .entry{display:flex;align-items:center;gap:6px;flex-wrap:wrap;animation:logIn .25s ease-out;}
+#log .entry .txt{color:var(--dim);}
+#log .entry.dmg .txt{color:var(--blood);}
+#log .entry.good .txt{color:var(--acid);}
+@keyframes logIn{
+  from{opacity:0; transform:translateY(4px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.footer-note{color:var(--dim);font-size:11px;text-align:center;margin-top:24px;letter-spacing:.05em;}
+
+.hidden{display:none !important;}
+
+#death-overlay{
+  position:fixed; inset:0; background:#000; z-index:100000;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+  animation:deathFadeIn .7s ease-out;
+}
+@keyframes deathFadeIn{ from{opacity:0;} to{opacity:1;} }
+.death-content{max-width:560px; width:100%; text-align:center;}
+.death-content h1{
+  font-family:'Anton',sans-serif; color:var(--blood); font-size:clamp(38px,9vw,68px);
+  letter-spacing:.1em; margin:0 0 16px; text-shadow:0 0 26px rgba(232,52,42,.55);
+  animation:deathFlicker 2.4s ease-in-out infinite;
+}
+@keyframes deathFlicker{
+  0%,100%{opacity:1;} 92%{opacity:1;} 93%{opacity:.75;} 94%{opacity:1;} 96%{opacity:.85;} 97%{opacity:1;}
+}
+.death-content .death-text{color:var(--dim); line-height:1.6; margin-bottom:26px; font-size:13.5px;}
+.death-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+#death-history{
+  max-height:0; overflow:hidden; transition:max-height .35s ease;
+  margin-top:22px; text-align:left; border-top:1px dashed var(--line);
+}
+#death-history.expanded{max-height:320px; overflow-y:auto; padding-top:14px;}
+#death-history-log .entry{display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;padding:3px 0;}
+#death-history-log .entry .txt{color:var(--dim);}
+#death-history-log .entry.dmg .txt{color:var(--blood);}
+#death-history-log .entry.good .txt{color:var(--acid);}
+#death-history-log .die{width:20px;height:20px;font-size:17px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="hero">
+    <div>
+      <h3>DELVE6 <span>// O COFRE ESQUECIDO</span></h3><br>
+      <div class="tag">Um dado. Uma chance. Caminhos infinitos.</div>
+    </div>
+    <div class="tag" id="header-status"></div>
+  </header>
+
+  <!-- ================= SETUP ================= -->
+  <section id="setup">
+    <div class="panel" data-label="01 — Classe">
+      <div class="class-grid" id="class-grid"></div>
+    </div>
+
+    <div class="panel" data-label="02 — Atributos (distribua 3 / 2 / 1 / 0)">
+      <div class="stat-row" id="stat-row"></div>
+    </div>
+
+    <div class="panel" data-label="03 — Equipamento inicial">
+      <div class="equip-subtitle">ARMA</div>
+      <div class="equip-grid" id="weapon-grid"></div>
+      <div class="equip-subtitle">ARMADURA</div>
+      <div class="equip-grid" id="armor-grid"></div>
+    </div>
+
+    <div>
+      <button id="btn-confirm-setup" disabled>Descer à masmorra</button>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="game" class="hidden">
+    <div id="desktop">
+
+      <div class="win" id="win-sheet">
+        <div class="win-titlebar">
+          <span class="win-title">FICHA</span>
+          <button class="win-min" title="Minimizar">–</button>
+        </div>
+        <div class="win-body" id="sheet"></div>
+      </div>
+
+      <div class="win" id="win-map">
+        <div class="win-titlebar">
+          <span class="win-title">MAPA DA MASMORRA</span>
+          <button class="win-min" title="Minimizar">–</button>
+        </div>
+        <div class="win-body" id="map-card"></div>
+      </div>
+
+      <div class="win" id="win-room">
+        <div class="win-titlebar">
+          <span class="win-title">MASMORRA</span>
+          <button class="win-min" title="Minimizar">–</button>
+        </div>
+        <div class="win-body">
+          <div id="room-pv-marker"></div>
+          <div id="room-panel"></div>
+          <div id="combat"></div>
+        </div>
+      </div>
+
+      <div class="win" id="win-actions">
+        <div class="win-titlebar">
+          <span class="win-title">AÇÕES</span>
+          <button class="win-min" title="Minimizar">–</button>
+        </div>
+        <div class="win-body">
+          <div id="actions"></div>
+        </div>
+      </div>
+
+      <div class="win" id="win-log">
+        <div class="win-titlebar">
+          <span class="win-title">REGISTRO DE DADOS</span>
+          <button class="win-min" title="Minimizar">–</button>
+        </div>
+        <div class="win-body">
+          <div id="log"></div>
+        </div>
+      </div>
+
+    </div>
+    <div id="taskbar"></div>
+  </section>
+
+  <div class="footer-note">DELVE6 — inspirado em Mörk Borg &amp; OD&amp;D — feito com um dado só</div>
+</div>
+
+<script>
+/* ===================================================================
+   DADOS DE JOGO
+=================================================================== */
+
+const DICE_GLYPH = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
+const CAPACITY = 6;
+
+function roll(){ return 1 + Math.floor(Math.random()*6); }
+
+const CLASSES = {
+  barbaro:{
+    name:'Bárbaro',
+    blurb:'Fúria crua e músculo. Prospera perto da morte.',
+    perkName:'Fúria de Sangue',
+    perkDesc:'Quando seu PV cai para metade (ou menos) do máximo, seus ataques corpo a corpo causam +2 de dano.',
+    startWeapon:'martelo'
+  },
+  cavaleiro:{
+    name:'Cavaleiro',
+    blurb:'Disciplina, aço e um juramento qualquer.',
+    perkName:'Guarda de Aço',
+    perkDesc:'Role d6: sua CA sobe nesse valor até seu próximo turno. Se o próximo ataque inimigo rolar o mesmo d6, você contra-ataca de graça. Se você rolou 6, isso também anula um crítico inimigo (d6=6) por completo.',
+    startWeapon:'espadaCurta'
+  },
+  mago:{
+    name:'Mago Elemental',
+    blurb:'Carrega a tempestade nas mãos vazias.',
+    perkName:'Rajada Elemental',
+    perkDesc:'Conjure d6 + PRE de dano em um inimigo, ignorando armadura. Em d6=1, a magia falha e você sofre 1 de dano. Recarrega em 3 turnos ou salas caminhadas.',
+    startWeapon:'cajado'
+  },
+  warlock:{
+    name:'Warlock',
+    blurb:'Vendeu algo. Não fala sobre o quê.',
+    perkName:'Pacto Sombrio',
+    perkDesc:'Sua próxima rolagem de ataque vira vantagem (2d6, usa o maior) e um crítico inimigo (d6=6) nesse meio-tempo é anulado. Recarrega em 3 turnos ou salas caminhadas.',
+    startWeapon:'adaga'
+  },
+  ladino:{
+    name:'Ladino',
+    blurb:'Já estava atrás de você antes de você notar. Começa com 1 Veneno Raro.',
+    perkName:'Golpe Furtivo',
+    perkDesc:'O primeiro ataque de cada combate rola vantagem (2d6, usa o maior) para acertar.',
+    startWeapon:'adaga'
+  },
+  cacador:{
+    name:'Caçador',
+    blurb:'A distância certa é a que o inimigo nunca vê.',
+    perkName:'Mira Certeira',
+    perkDesc:'Ataques com Arco nunca erram e causam +1 de dano fixo.',
+    startWeapon:'arco'
+  }
+};
+
+const WEAPONS = {
+  desarmado:{name:'Desarmado', n:0, req:0},
+  cajado:{name:'Cajado', n:0, req:0, preMod:2, classOnly:'mago'},
+  adaga:{name:'Adaga', n:1, req:0, critAdvantage:true},
+  espadaCurta:{name:'Espada Curta', n:2, req:0},
+  espadaLonga:{name:'Espada Longa', n:3, req:2},
+  martelo:{name:'Martelo de Guerra', n:4, req:3},
+  //martelo_madeira:{name:'Martelo de Guerra', n:4, req:3},
+  arco:{name:'Arco', n:1, req:0, reqAgl:2, critAdvantage:true},
+  espada_enferrujada:{name:'Espada Enferrujada', n:1, req:0},
+  maca:{name:'Maça', n:2, req:0}
+};
+
+const ARMORS = {
+  capuz:{name:'Capuz', reduce:0, aglMod:2, req:0},
+  couro:{name:'Armadura de Couro', reduce:1, aglMod:1, req:0},
+  armadura_enferrujada:{name:'Armadura Enferrujada', reduce:1, aglMod:0, req:0},
+  barbara:{name:'Armadura Bárbara', reduce:2, aglMod:0, req:0},
+  escudo_madeira:{name:'Escudo de Madeira', reduce:1, aglMod:0, req:0},
+  placas:{name:'Armadura de Placas', reduce:3, aglMod:-1, req:2}
+};
+
+const CONSUMABLE_NAME = {coquetel:'Coquetel Verde', lockpick:'Lockpick', tocha:'Tocha', veneno:'Veneno Raro'};
+const JEWEL_COLORS = ['Amarela','Vermelha','Azul'];
+const STARTER_WEAPONS = ['desarmado','cajado','adaga','espadaCurta','espadaLonga','martelo','arco'];
+const STARTER_ARMORS = ['capuz','couro','barbara','placas'];
+
+function meetsWeaponReq(item){
+  if(item.classOnly && state.cls!==item.classOnly) return false;
+  const forOk = state.stats.FOR===null ? (item.req||0)===0 : state.stats.FOR>=(item.req||0);
+  const aglOk = state.stats.AGL===null ? (item.reqAgl||0)===0 : state.stats.AGL>=(item.reqAgl||0);
+  return forOk && aglOk;
+}
+function meetsArmorReq(item){
+  if(state.stats.FOR===null) return (item.req||0)===0;
+  return state.stats.FOR>=(item.req||0);
+}
+function weaponReqText(item){
+  const parts=[];
+  if(item.req) parts.push('FOR≥'+item.req);
+  if(item.reqAgl) parts.push('AGL≥'+item.reqAgl);
+  if(item.classOnly) parts.push('Somente '+CLASSES[item.classOnly].name);
+  return parts.join(' · ');
+}
+function armorReqText(item){
+  const parts=[];
+  if(item.req) parts.push('FOR≥'+item.req);
+  return parts.join(' · ');
+}
+function aglModText(a){
+  if(!a.aglMod) return '';
+  return a.aglMod>0 ? ' · +'+a.aglMod+' AGL' : ' · '+a.aglMod+' AGL';
+}
+
+const TABLE2 = ['Saguão empoeirado','Corredor estreito','Boca de caverna úmida','Escadaria que desce em espiral','Poço com uma corda puída amarrada à borda','Elevador de correntes enferrujadas descendo na escuridão'];
+
+const AREA_KINDS = ['circular','deadend','spiral','trap','dark','prison'];
+const KIND_TITLE = {
+  entrance:'Entrada', gate:'Portão Rúnico', boss:'Salão do Ciclope',
+  circular:'Corredor Circular', deadend:'Beco sem Saída', spiral:'Escada Espiral',
+  trap:'Corredor Armadilhado', dark:'Sala Escura', prison:'Prisão'
+};
+const KIND_TEXT = {
+  circular:'Um corredor circular que volta sobre si mesmo.',
+  deadend:'Um corredor sem saída — beco morto, só a poeira acumulada.',
+  spiral:'Uma escada espiral gasta pelo tempo, degraus lascados.',
+  trap:'Placas de pedra soltas cobrem o chão — algo aqui está armado para ferir.',
+  dark:'Escuridão completa e impenetrável.',
+  prison:'Cela de prisão, grades tortas e um cheiro de mofo.'
+};
+const KIND_COLOR = {
+  entrance:'#6fdc8c', gate:'#e8c547', boss:'#e8342a',
+  circular:'#d7ff3d', deadend:'#6b6553', spiral:'#3da9ff',
+  trap:'#ff9a3d', dark:'#1c1a17', prison:'#b98bf0'
+};
+const UNKNOWN_COLOR = '#4a4538';
+
+/* ===================================================================
+   ESTADO
+=================================================================== */
+
+let state = null;
+
+function newState(){
+  return {
+    cls:null,
+    stats:{FOR:null,AGL:null,PRE:null,DUR:null},
+    pv:0, pvMax:0, pvRoll:0, caRoll:0,
+    weaponKey:'desarmado', armorKey:'capuz',
+    _weaponManual:false, _armorManual:false,
+    backpack:{ weapons:[], armors:[], consumables:{coquetel:1, lockpick:2, tocha:1, veneno:0} },
+    weaponPoisoned:false,
+    jewels:[],
+    jewelsEverFound:[],
+    gold:0,
+    perksUsed:{},
+    cavaleiroGuardBonus:0,
+    perkCooldowns:{mago:0, warlock:0},
+    torchLit:false, torchRoomsLeft:0,
+    inCombat:false,
+    combatEnemy:null,
+    combatFirstAttackDone:false,
+    _pactActive:false,
+    rooms:{},
+    currentRoomId:null,
+    roomCounter:0,
+    gatePlaced:false,
+    dead:false,
+    victorious:false
+  };
+}
+
+function effAGL(){
+  const armor = ARMORS[state.armorKey];
+  return state.stats.AGL + (armor ? (armor.aglMod||0) : 0);
+}
+function effPRE(){
+  const weapon = WEAPONS[state.weaponKey];
+  return state.stats.PRE + (weapon ? (weapon.preMod||0) : 0);
+}
+function currentCA(){ return effAGL() + state.caRoll + (state.cavaleiroGuardBonus||0); }
+
+function slotsUsed(){
+  const consCount = Object.values(state.backpack.consumables).filter(v=>v>0).length;
+  return state.backpack.weapons.length + state.backpack.armors.length + consCount;
+}
+
+function isDarkRoom(room){
+  return room && room.kind==='dark' && !state.torchLit;
+}
+function roomIsLit(room){ return !isDarkRoom(room); }
+
+/* ===================================================================
+   LOG / DADOS
+=================================================================== */
+
+function logEntry(html, cls){
+  const log = document.getElementById('log');
+  const div = document.createElement('div');
+  div.className = 'entry' + (cls ? ' '+cls : '');
+  div.innerHTML = html;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve, ms));
+}
+
+function dieSpan(value, opts){
+  opts = opts || {};
+  let cls = 'die';
+  if(opts.crit) cls += ' crit';
+  if(opts.bad) cls += ' bad';
+  return `<span class="${cls}">${DICE_GLYPH[value]}</span>`;
+}
+
+/* Rolls a d6 for the PLAYER, automatically applying disadvantage if the
+   current room is dark & unlit, or advantage if requested (they cancel out). */
+function rollForPlayer(label, opts){
+  opts = opts || {};
+  const room = state.rooms[state.currentRoomId];
+  let disadvantage = isDarkRoom(room) && !opts.ignoreDark;
+  let advantage = !!opts.advantage;
+  if(advantage && disadvantage){ advantage=false; disadvantage=false; }
+  let r;
+  if(advantage){
+    const a=roll(), b=roll();
+    r = Math.max(a,b);
+    logEntry(`<b>${label} (vantagem)</b> ${dieSpan(a)} ${dieSpan(b)} <span class="txt">usa o maior: <b>${r}</b></span>`);
+  } else if(disadvantage){
+    const a=roll(), b=roll();
+    r = Math.min(a,b);
+    logEntry(`<b>${label} (desvantagem — escuro)</b> ${dieSpan(a)} ${dieSpan(b)} <span class="txt">usa o menor: <b>${r}</b></span>`);
+  } else {
+    r = roll();
+    logEntry(`<b>${label}</b> ${dieSpan(r,{crit:r===6,bad:r===1})}`);
+  }
+  return r;
+}
+
+/* ===================================================================
+   SETUP UI
+=================================================================== */
+
+function renderClassGrid(){
+  const grid = document.getElementById('class-grid');
+  grid.innerHTML = '';
+  Object.entries(CLASSES).forEach(([key,c])=>{
+    const div = document.createElement('div');
+    div.className = 'class-card';
+    div.dataset.key = key;
+    div.innerHTML = `<h3>${c.name}</h3><p>${c.blurb}</p><p class="perk"><b>${c.perkName}:</b> ${c.perkDesc}</p>`;
+    div.onclick = ()=>{
+      document.querySelectorAll('.class-card').forEach(e=>e.classList.remove('selected'));
+      div.classList.add('selected');
+      state.cls = key;
+      if(!state._weaponManual) state.weaponKey = c.startWeapon;
+      refreshEquipmentValidity();
+      checkSetupReady();
+    };
+    grid.appendChild(div);
+  });
+}
+
+function renderStatRow(){
+  const row = document.getElementById('stat-row');
+  row.innerHTML = '';
+  const keys = ['FOR','AGL','PRE','DUR'];
+  keys.forEach(k=>{
+    const box = document.createElement('div');
+    box.className = 'stat-box';
+    box.innerHTML = `<label>${k}</label><select data-stat="${k}"><option value="">--</option></select>`;
+    row.appendChild(box);
+  });
+  populateStatOptions();
+  row.querySelectorAll('select').forEach(sel=>{
+    sel.onchange = ()=>{
+      state.stats[sel.dataset.stat] = sel.value===''? null : parseInt(sel.value);
+      populateStatOptions();
+      refreshEquipmentValidity();
+      checkSetupReady();
+    };
+  });
+}
+
+function populateStatOptions(){
+  const used = Object.values(state.stats).filter(v=>v!==null);
+  const all = [3,2,1,0];
+  document.querySelectorAll('#stat-row select').forEach(sel=>{
+    const statKey = sel.dataset.stat;
+    const current = state.stats[statKey];
+    const options = all.filter(v=> !used.includes(v) || v===current);
+    sel.innerHTML = '<option value="">--</option>' + options.map(v=>`<option value="${v}" ${v===current?'selected':''}>${v}</option>`).join('');
+  });
+}
+
+function checkSetupReady(){
+  const statsFull = Object.values(state.stats).every(v=>v!==null);
+  document.getElementById('btn-confirm-setup').disabled = !(state.cls && statsFull);
+}
+
+function renderEquipmentGrids(){
+  const wg = document.getElementById('weapon-grid');
+  wg.innerHTML = STARTER_WEAPONS.map(key=>{
+    const w = WEAPONS[key];
+    const ok = meetsWeaponReq(w);
+    const sel = state.weaponKey===key;
+    const reqTxt = weaponReqText(w);
+    return `<div class="equip-card ${sel?'selected':''} ${ok?'':'locked'}" onclick="${ok?`selectWeapon('${key}')`:''}">
+      <b>${w.name}</b>
+      <div class="mod">d6+${w.n}${w.critAdvantage?' · 2 rolagens em crítico':''}${w.preMod?' · +'+w.preMod+' PRE':''}</div>
+      ${reqTxt? `<div class="req">${reqTxt}</div>`:''}
+    </div>`;
+  }).join('');
+
+  const ag = document.getElementById('armor-grid');
+  ag.innerHTML = STARTER_ARMORS.map(key=>{
+    const a = ARMORS[key];
+    const ok = meetsArmorReq(a);
+    const sel = state.armorKey===key;
+    const reqTxt = armorReqText(a);
+    return `<div class="equip-card ${sel?'selected':''} ${ok?'':'locked'}" onclick="${ok?`selectArmor('${key}')`:''}">
+      <b>${a.name}</b>
+      <div class="mod">-${a.reduce} dano${aglModText(a)}</div>
+      ${reqTxt? `<div class="req">${reqTxt}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function selectWeapon(key){
+  const w = WEAPONS[key];
+  if(!meetsWeaponReq(w)) return;
+  state.weaponKey = key;
+  state._weaponManual = true;
+  renderEquipmentGrids();
+}
+function selectArmor(key){
+  const a = ARMORS[key];
+  if(!meetsArmorReq(a)) return;
+  state.armorKey = key;
+  state._armorManual = true;
+  renderEquipmentGrids();
+}
+
+function refreshEquipmentValidity(){
+  const w = WEAPONS[state.weaponKey];
+  if(!meetsWeaponReq(w)){
+    const c = state.cls ? CLASSES[state.cls] : null;
+    if(c && !state._weaponManual && meetsWeaponReq(WEAPONS[c.startWeapon])){
+      state.weaponKey = c.startWeapon;
+    } else {
+      state.weaponKey = 'desarmado';
+      state._weaponManual = false;
+    }
+  }
+  const a = ARMORS[state.armorKey];
+  if(!meetsArmorReq(a)){
+    state.armorKey = 'capuz';
+    state._armorManual = false;
+  }
+  renderEquipmentGrids();
+}
+
+document.getElementById('btn-confirm-setup').onclick = ()=>{
+  const pvR = roll();
+  state.pvRoll = pvR;
+  state.pvMax = state.stats.DUR + pvR;
+  state.pv = state.pvMax;
+
+  const caR = roll();
+  state.caRoll = caR;
+
+  if(state.cls==='ladino') state.backpack.consumables.veneno = 1;
+
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  initWindowSystem();
+  if(!layoutApplied){ layoutDefaultWindows(); layoutApplied = true; }
+
+  logEntry(`<b>PV inicial</b> ${dieSpan(pvR)} <span class="txt">(DUR ${state.stats.DUR} + ${pvR} = <b>${state.pvMax}</b>)</span>`);
+  logEntry(`<b>CA inicial</b> ${dieSpan(caR)} <span class="txt">(AGL ${effAGL()} + ${caR} = <b>${currentCA()}</b>)</span>`);
+
+  const entrance = makeRoom(null, 'entrance', {depth:0});
+  state.currentRoomId = entrance.id;
+
+  renderSheet();
+  enterRoom(entrance);
+};
+
+/* ===================================================================
+   FICHA / INVENTÁRIO
+=================================================================== */
+
+function renderSheet(){
+  const s = document.getElementById('sheet');
+  const c = CLASSES[state.cls];
+  const w = WEAPONS[state.weaponKey];
+  const a = ARMORS[state.armorKey];
+  const pvPct = Math.max(0, Math.round(100*state.pv/state.pvMax));
+  const room = state.rooms[state.currentRoomId];
+
+  let html = `
+    <h2>${c.name}</h2>
+    <div class="bar-wrap"><div class="bar-fill" style="width:${pvPct}%"></div><div class="bar-label">PV ${Math.max(0,state.pv)} / ${state.pvMax}</div></div>
+    <div class="sheet-row"><span>CA (evasão)</span><b>${currentCA()}</b></div>
+    <div class="sheet-row"><span>FOR</span><b>${state.stats.FOR}</b></div>
+    <div class="sheet-row"><span>AGL</span><b>${state.stats.AGL}${a.aglMod? ' ('+effAGL()+' c/ armadura)':''}</b></div>
+    <div class="sheet-row"><span>PRE</span><b>${state.stats.PRE}${w.preMod? ' ('+effPRE()+' c/ '+w.name+')':''}</b></div>
+    <div class="sheet-row"><span>DUR</span><b>${state.stats.DUR}</b></div>
+    <div class="sheet-row"><span>Arma equipada</span><b>${w.name} (d6+${w.n}${w.critAdvantage? ' · 2 rolagens em crítico':''})</b></div>
+    <div class="sheet-row"><span>Armadura vestida</span><b>${a.name} (-${a.reduce} dano${aglModText(a)})</b></div>
+    <div class="sheet-row"><span>Ouro</span><b>${state.gold}</b></div>
+
+    <div class="inv-section-title"><span>MOCHILA</span><span>${slotsUsed()}/${CAPACITY}</span></div>
+  `;
+
+  if(state.backpack.weapons.length===0 && state.backpack.armors.length===0){
+    html += `<div class="inv-row"><span class="name" style="color:var(--dim)">nenhum item extra</span></div>`;
+  }
+  state.backpack.weapons.forEach((key,idx)=>{
+    const wi = WEAPONS[key];
+    html += `<div class="inv-row"><span class="name">${wi.name} <span style="color:var(--dim)">(d6+${wi.n}${wi.critAdvantage? ' · 2 rolagens em crítico':''})</span></span><span class="btns">
+      <button class="small secondary" onclick="equipFromBackpack('weapon',${idx})">Equipar</button>
+      <button class="small danger" onclick="dropFromBackpack('weapon',${idx})">Largar</button>
+    </span></div>`;
+  });
+  state.backpack.armors.forEach((key,idx)=>{
+    const ai = ARMORS[key];
+    html += `<div class="inv-row"><span class="name">${ai.name} <span style="color:var(--dim)">(-${ai.reduce} dano${aglModText(ai)})</span></span><span class="btns">
+      <button class="small secondary" onclick="equipFromBackpack('armor',${idx})">Vestir</button>
+      <button class="small danger" onclick="dropFromBackpack('armor',${idx})">Largar</button>
+    </span></div>`;
+  });
+
+  html += `<div class="inv-section-title"><span>CONSUMÍVEIS</span></div>`;
+  const coq = state.backpack.consumables.coquetel;
+  const lp = state.backpack.consumables.lockpick;
+  const tc = state.backpack.consumables.tocha;
+  const ven = state.backpack.consumables.veneno;
+  const showTocha = tc>0 || state.torchLit;
+
+  if(coq<=0 && lp<=0 && !showTocha && ven<=0){
+    html += `<div class="inv-row"><span class="name" style="color:var(--dim)">nenhum consumível</span></div>`;
+  }
+  if(coq>0){
+    html += `<div class="inv-row"><span class="name">Coquetel Verde ×${coq}</span><span class="btns">
+      <button class="small secondary" ${state.dead || state.victorious?'disabled':''} onclick="useCoquetel()">Usar</button>
+      <button class="small danger" onclick="dropConsumable('coquetel')">Largar</button>
+    </span></div>`;
+  }
+  if(lp>0){
+    html += `<div class="inv-row"><span class="name">Lockpick ×${lp}</span><span class="btns">
+      <button class="small danger" onclick="dropConsumable('lockpick')">Largar</button>
+    </span></div>`;
+  }
+  if(showTocha){
+    const canIgnite = room && room.kind==='dark' && !state.torchLit && tc>0 && !state.dead && !state.victorious;
+    const torchStatus = state.torchLit ? ` <span style="color:var(--acid)">(aceso · ${state.torchRoomsLeft} sala(s) restantes)</span>` : '';
+    html += `<div class="inv-row"><span class="name">Tocha ×${tc}${torchStatus}</span><span class="btns">
+      <button class="small secondary" ${canIgnite?'':'disabled'} onclick="igniteTorch()">Acender</button>
+      <button class="small danger" ${tc<=0?'disabled':''} onclick="dropConsumable('tocha')">Largar</button>
+    </span></div>`;
+  }
+  if(ven>0){
+    const weaponAllowsPoison = canImbueWeapon();
+    const canImbue = !state.weaponPoisoned && !state.dead && !state.victorious && weaponAllowsPoison;
+    const imbuedTag = state.weaponPoisoned ? ` <span style="color:var(--acid)">(arma imbuída)</span>` : (!weaponAllowsPoison ? ` <span style="color:var(--dim)">(arma atual não aceita veneno)</span>` : '');
+    html += `<div class="inv-row"><span class="name">Veneno Raro ×${ven}${imbuedTag}</span><span class="btns">
+      <button class="small secondary" ${canImbue?'':'disabled'} onclick="useVeneno()">Imbuir</button>
+      <button class="small danger" onclick="dropConsumable('veneno')">Largar</button>
+    </span></div>`;
+  }
+
+  html += `<div class="inv-section-title"><span>JOIAS (${state.jewels.length}/3)</span></div>
+    <div class="tag-list">${state.jewels.length? state.jewels.map(j=>`<span class="jewel">◆ ${j}</span>`).join('') : '<span>nenhuma</span>'}</div>
+    <div class="inv-section-title"><span>PERÍCIA</span></div>
+    <div class="tag-list"><span>${c.perkName}</span></div>
+  `;
+
+  s.innerHTML = html;
+  renderRoomPVMarker();
+}
+
+function canImbueWeapon(){
+  return state.weaponKey!=='cajado' && state.weaponKey!=='martelo' && state.weaponKey!=='desarmado';
+}
+
+function renderRoomPVMarker(){
+  const el = document.getElementById('room-pv-marker');
+  if(!el || !state.pvMax) return;
+  if(state.inCombat){ el.innerHTML = ''; el.style.display = 'none'; return; }
+  el.style.display = '';
+  const pct = Math.max(0, Math.round(100*state.pv/state.pvMax));
+  el.innerHTML = `<div class="bar-wrap" style="margin:0 0 12px;"><div class="bar-fill" style="width:${pct}%"></div><div class="bar-label">PV ${Math.max(0,state.pv)} / ${state.pvMax}</div></div>`;
+}
+
+function useVeneno(){
+  if(state.backpack.consumables.veneno<=0 || state.weaponPoisoned || state.dead || state.victorious || !canImbueWeapon()) return;
+  state.backpack.consumables.veneno--;
+  state.weaponPoisoned = true;
+  renderSheet();
+  logEntry(`<span class="txt good"><b>Veneno Raro</b> imbuído em ${WEAPONS[state.weaponKey].name}. O próximo dano que penetrar a armadura envenenará o alvo.</span>`,'good');
+  if(state.inCombat){ renderCombat(); enemyTurn(); }
+}
+
+function useCoquetel(){
+  if(state.backpack.consumables.coquetel<=0 || state.dead || state.victorious) return;
+  state.backpack.consumables.coquetel--;
+  const heal = 1 + roll();
+  state.pv = Math.min(state.pvMax, state.pv + heal);
+  renderSheet();
+  logEntry(`<span class="txt good">Coquetel Verde: recupera <b>${heal}</b> PV.</span>`,'good');
+  if(state.inCombat){ renderCombat(); enemyTurn(); }
+}
+
+function dropConsumable(type){
+  if(state.backpack.consumables[type]<=0) return;
+  state.backpack.consumables[type]--;
+  renderSheet();
+  logEntry(`<span class="txt">Descartado: ${CONSUMABLE_NAME[type]}.</span>`);
+}
+
+function equipFromBackpack(type, idx){
+  const arr = type==='weapon'? state.backpack.weapons : state.backpack.armors;
+  const key = arr[idx];
+  const item = type==='weapon'? WEAPONS[key] : ARMORS[key];
+  const ok = type==='weapon' ? meetsWeaponReq(item) : meetsArmorReq(item);
+  if(!ok){
+    const reqTxt = type==='weapon' ? weaponReqText(item) : armorReqText(item);
+    logEntry(`<span class="txt dmg">Requisitos insuficientes (${reqTxt}) para usar ${item.name} com eficácia.</span>`,'dmg');
+    return;
+  }
+  const old = type==='weapon'? state.weaponKey : state.armorKey;
+  arr.splice(idx,1);
+  if(type==='weapon') state.weaponKey = key; else state.armorKey = key;
+  if(old && !(type==='weapon' && old==='desarmado')){
+    if(slotsUsed()<CAPACITY){ arr.push(old); }
+    else logEntry(`<span class="txt">Sem espaço na mochila — o equipamento anterior foi deixado para trás.</span>`);
+  }
+  renderSheet();
+  logEntry(`<span class="txt good">${type==='weapon'?'Arma equipada':'Armadura vestida'}: <b>${item.name}</b>.</span>`,'good');
+  if(state.inCombat) renderCombatActions();
+}
+
+function dropFromBackpack(type, idx){
+  const arr = type==='weapon'? state.backpack.weapons : state.backpack.armors;
+  arr.splice(idx,1);
+  renderSheet();
+  logEntry(`<span class="txt">Item descartado.</span>`);
+}
+
+function igniteTorch(){
+  const room = state.rooms[state.currentRoomId];
+  if(!room || room.kind!=='dark' || state.torchLit || state.backpack.consumables.tocha<=0) return;
+  state.backpack.consumables.tocha--;
+  const dur = roll();
+  state.torchLit = true;
+  state.torchRoomsLeft = dur;
+  renderSheet();
+  logEntry(`<b>Tocha acesa</b> ${dieSpan(dur)} <span class="txt">Deve durar <b>${dur}</b> sala(s) antes de se apagar.</span>`,'good');
+  renderRoomPanel(roomTitle(room), KIND_TEXT[room.kind] + ' Agora, à luz da tocha, você vê melhor.', []);
+  if(state.inCombat){ renderCombat(); enemyTurn(); }
+  if(!state.inCombat && room.pendingGrant){
+    const g = room.pendingGrant;
+    room.pendingGrant = null;
+    g();
+  }
+  if(!state.inCombat) showRoomNavActions(room);
+}
+
+/* ===================================================================
+   MASMORRA — GRAFO PERSISTENTE
+=================================================================== */
+
+function makeRoom(parentId, kind, opts){
+  opts = opts || {};
+  const id = 'r'+(++state.roomCounter);
+  const room = {
+    id, parentId, kind,
+    children: null,
+    door: opts.door || null,
+    connectionLabel: opts.connectionLabel || '',
+    event: null,
+    entered:false,
+    trapResolved:false,
+    pendingGrant:null,
+    extraExploreUsed:false,
+    x:0, y:0, depth: opts.depth||0
+  };
+  state.rooms[id] = room;
+  return room;
+}
+
+function roomTitle(room){
+  return KIND_TITLE[room.kind] || 'Sala';
+}
+
+function layoutMap(){
+  let yCounter = 0;
+  function visit(id, depth){
+    const room = state.rooms[id];
+    if(!room) return 0;
+    room.x = depth;
+    if(!room.children || room.children.length===0){
+      room.y = yCounter++;
+      return room.y;
+    }
+    const ys = room.children.map(cid=>visit(cid, depth+1));
+    room.y = ys.reduce((a,b)=>a+b,0)/ys.length;
+    return room.y;
+  }
+  const root = Object.values(state.rooms).find(r=>r.kind==='entrance');
+  if(root) visit(root.id, 0);
+}
+
+function nodeLabel(room){
+  if(room.kind==='entrance') return 'Entrada';
+  if(!room.entered) return '?';
+  if(room.kind==='gate') return 'Portão';
+  if(room.kind==='boss') return 'Ciclope';
+  return roomTitle(room).split(' ')[0];
+}
+
+function renderMap(){
+  layoutMap();
+  const rooms = Object.values(state.rooms);
+  const maxX = Math.max(...rooms.map(r=>r.x),1);
+  const maxY = Math.max(...rooms.map(r=>r.y),1);
+  const stepX=88, stepY=52, pad=34;
+  const w = pad*2 + maxX*stepX;
+  const h = pad*2 + maxY*stepY;
+
+  let svg = `<svg viewBox="0 0 ${w} ${Math.max(h,68)}" width="100%" preserveAspectRatio="xMinYMid meet">`;
+
+  rooms.forEach(r=>{
+    if(r.children) r.children.forEach(cid=>{
+      const c = state.rooms[cid];
+      if(!c) return;
+      const x1=pad+r.x*stepX, y1=pad+r.y*stepY, x2=pad+c.x*stepX, y2=pad+c.y*stepY;
+      svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c.entered?'#5c5643':'#332f28'}" stroke-width="2" stroke-dasharray="${c.entered?'0':'5,4'}"/>`;
+      if(c.door && c.door.locked && !c.door.opened){
+        const mx=(x1+x2)/2, my=(y1+y2)/2;
+        svg += `<text x="${mx}" y="${my-4}" text-anchor="middle" font-size="11" fill="var(--blood)">🔒</text>`;
+      }
+    });
+  });
+
+  rooms.forEach(r=>{
+    const x=pad+r.x*stepX, y=pad+r.y*stepY;
+    const known = r.kind==='entrance' || r.entered;
+    let color = known ? (KIND_COLOR[r.kind] || '#948d78') : UNKNOWN_COLOR;
+    const isCurrent = r.id===state.currentRoomId;
+    const opacity = r.entered? 1 : 0.75;
+    svg += `<g onclick="travelTo('${r.id}')" style="cursor:pointer;">`;
+    svg += `<circle cx="${x}" cy="${y}" r="${isCurrent?12:9}" fill="${color}" fill-opacity="${opacity}" stroke="${isCurrent?'#d7ff3d':'#000'}" stroke-width="${isCurrent?3:1}"/>`;
+    svg += `<text x="${x}" y="${y+22}" text-anchor="middle" font-size="9" fill="#948d78">${nodeLabel(r)}</text>`;
+    svg += `</g>`;
+  });
+
+  svg += `</svg>`;
+  svg += `<div class="legend">
+    <span><i style="background:${KIND_COLOR.entrance}"></i>Entrada</span>
+    <span><i style="background:${KIND_COLOR.trap}"></i>Armadilha</span>
+    <span><i style="background:${KIND_COLOR.dark}"></i>Escura</span>
+    <span><i style="background:${KIND_COLOR.prison}"></i>Prisão</span>
+    <span><i style="background:${KIND_COLOR.deadend}"></i>Beco sem saída</span>
+    <span><i style="background:${KIND_COLOR.gate}"></i>Portão Rúnico</span>
+    <span><i style="background:${KIND_COLOR.boss}"></i>Chefe</span>
+  </div>`;
+
+  document.getElementById('map-card').innerHTML = svg;
+}
+
+function renderRoomPanel(title, text, flavorLines){
+  const p = document.getElementById('room-panel');
+  p.innerHTML = `<div class="room-title">${title}</div><p>${text}</p>` +
+    (flavorLines||[]).map(f=>`<p class="flavor">${f}</p>`).join('');
+}
+
+function mkButton(label, fn, cls){
+  const b = document.createElement('button');
+  b.textContent = label;
+  if(cls) b.className = cls;
+  b.onclick = fn;
+  return b;
+}
+
+/* ---------------- travel / entry ---------------- */
+
+function isAdjacentRoom(roomId){
+  const cur = state.rooms[state.currentRoomId];
+  if(!cur) return false;
+  if(cur.parentId === roomId) return true;
+  if(cur.children && cur.children.includes(roomId)) return true;
+  return false;
+}
+
+function travelTo(roomId){
+  if(state.inCombat) return;
+  const room = state.rooms[roomId];
+  if(!room) return;
+  if(roomId !== state.currentRoomId && !isAdjacentRoom(roomId)){
+    logEntry('<span class="txt">Você só pode se mover entre salas adjacentes.</span>');
+    return;
+  }
+  if(room.door && room.door.locked && !room.door.opened){
+    presentLockedDoor(room);
+    return;
+  }
+  enterRoom(room);
+}
+
+function enterRoom(room){
+  if(state.inCombat) return;
+  const movingToNewRoom = state.currentRoomId !== room.id;
+  if(movingToNewRoom && state.torchLit){
+    state.torchRoomsLeft--;
+    if(state.torchRoomsLeft<=0){
+      state.torchLit = false;
+      logEntry('<span class="txt dmg">A tocha queima até o fim e se apaga na escuridão.</span>','dmg');
+    }
+  }
+  if(movingToNewRoom) tickPerkCooldowns();
+  const wasFirst = !room.entered;
+  room.entered = true;
+  state.currentRoomId = room.id;
+  renderSheet();
+  renderMap();
+
+  if(room.kind==='entrance'){
+    renderRoomPanel('A Entrada', 'Uma boca de pedra na terra. O ar frio sobe das profundezas. Não há volta, só descida.', []);
+    showRoomNavActions(room);
+    return;
+  }
+
+  if(room.kind==='gate'){
+    renderGateRoom(room);
+    return;
+  }
+
+  if(room.kind==='boss'){
+    renderRoomPanel('Salão do Ciclope', 'O ar cheira a sangue velho. Algo enorme se ergue das trevas ao fundo.', []);
+    if(room.won){
+      document.getElementById('actions').innerHTML = '';
+      return;
+    }
+    if(!state.inCombat) startCombat('ciclope', true);
+    return;
+  }
+
+  if(wasFirst){
+    logEntry(`<span class="txt">Área revelada: <b>${roomTitle(room)}</b></span>`);
+    renderRoomPanel(roomTitle(room), (room.connectionLabel? 'Você atravessa: '+room.connectionLabel+'. ' : '') + KIND_TEXT[room.kind], []);
+    if(room.kind==='dark'){
+      if(state.torchLit) logEntry('<span class="txt">A luz da tocha ainda ilumina o caminho.</span>');
+      else logEntry('<span class="txt dmg">A escuridão é total — tudo aqui será mais difícil sem luz.</span>','dmg');
+    }
+
+    if(room.kind==='trap' && !room.trapResolved){
+      resolveTrap(room, ()=>{ afterAreaSetup(room); });
+      return;
+    }
+    afterAreaSetup(room);
+  } else {
+    const extra = room.event && room.event.resolved ? ['Já explorada — nada além do eco dos seus passos.'] : [];
+    renderRoomPanel(roomTitle(room), KIND_TEXT[room.kind], extra);
+
+    const r = roll();
+    logEntry(`<b>Sala revisitada</b> ${dieSpan(r)}`);
+    if(r===1){
+      logEntry('<span class="txt dmg">Um kobold aparece de novo entre as sombras!</span>','dmg');
+      startCombat('kobold', false);
+      return;
+    }
+    if(r===2){
+      logEntry('<span class="txt dmg">Um guarda esqueleto se ergue de novo!</span>','dmg');
+      startCombat('esqueleto', false);
+      return;
+    }
+    logEntry('<span class="txt">Nada acontece desta vez.</span>');
+    showRoomNavActions(room);
+  }
+}
+
+function afterAreaSetup(room){
+  const r = roll();
+  logEntry(`<b>Evento</b> ${dieSpan(r)}`);
+  resolveEventRoll(room, r);
+}
+
+function resolveTrap(room, next){
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  actions.appendChild(mkButton('Atravessar com cuidado (teste AGL vs CA 7)', async ()=>{
+    document.getElementById('actions').innerHTML = '';
+    const r = rollForPlayer('Armadilha — AGL');
+    const total = r + effAGL();
+    await sleep(500);
+    logEntry(`<span class="txt">d6 ${r} + AGL ${effAGL()} = <b>${total}</b> vs CA 7</span>`);
+    room.trapResolved = true;
+    await sleep(500);
+    if(total>=7){ logEntry('<span class="txt good">Você atravessa ileso.</span>','good'); await sleep(400); }
+    else {
+      logEntry('<span class="txt dmg">A armadilha dispara!</span>','dmg');
+      await sleep(450);
+      const dmg = roll();
+      state.pv -= dmg; renderSheet();
+      logEntry(`<span class="txt dmg">${dieSpan(dmg,{bad:true})} <b>${dmg}</b> de dano.</span>`,'dmg');
+      await sleep(500);
+    }
+    checkDeath();
+    if(!state.dead) next();
+  }));
+}
+
+/* ---------------- portas trancadas ---------------- */
+
+function presentLockedDoor(room){
+  const door = room.door;
+  renderRoomPanel('Porta Trancada', `Uma porta de ${door.material} trancada (CA ${door.ca}) barra o caminho. O que existe atrás dela ainda é um mistério.`, []);
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  document.getElementById('room-panel').insertAdjacentHTML('beforeend',
+    `<p class="flavor">Use um Lockpick (teste de AGL, sem forçar), arrombe (teste de FOR, arriscando dano), ou volte.</p>`);
+
+  if(state.backpack.consumables.lockpick>0){
+    actions.appendChild(mkButton(`Usar Lockpick (${state.backpack.consumables.lockpick})`, async ()=>{
+      document.getElementById('actions').innerHTML = '';
+      state.backpack.consumables.lockpick--; renderSheet();
+      const r = rollForPlayer('Lockpick — AGL');
+      const total = r + effAGL();
+      await sleep(500);
+      logEntry(`<span class="txt">d6 ${r} + AGL ${effAGL()} = <b>${total}</b> vs CA ${door.ca}</span>`);
+      await sleep(450);
+      if(total>=door.ca){ door.opened = true; logEntry('<span class="txt good">A fechadura cede sem barulho.</span>','good'); await sleep(400); enterRoom(room); }
+      else { logEntry('<span class="txt">A fechadura resiste. Tente de novo, arrombe, ou volte.</span>'); presentLockedDoor(room); }
+    }));
+  }
+  actions.appendChild(mkButton('Arrombar a porta', async ()=>{
+    document.getElementById('actions').innerHTML = '';
+    const r = rollForPlayer('Arrombar — FOR');
+    const total = r + state.stats.FOR;
+    await sleep(500);
+    logEntry(`<span class="txt">Total ${total} vs CA ${door.ca}</span>`);
+    await sleep(450);
+    if(total>=door.ca){ door.opened = true; logEntry('<span class="txt good">A porta cede sob a força.</span>','good'); await sleep(400); enterRoom(room); }
+    else {
+      logEntry('<span class="txt dmg">A porta não cede!</span>','dmg');
+      await sleep(400);
+      const dmg = roll();
+      state.pv -= dmg; renderSheet();
+      logEntry(`<span class="txt dmg">Você se machuca ${dieSpan(dmg,{bad:true})} (<b>${dmg}</b> dano).</span>`,'dmg');
+      await sleep(500);
+      checkDeath();
+      if(!state.dead) presentLockedDoor(room);
+    }
+  },'secondary'));
+  const parentId = room.parentId;
+  if(parentId) actions.appendChild(mkButton('Voltar', ()=>enterRoom(state.rooms[parentId]), 'secondary'));
+}
+
+/* ---------------- geração (tabelas 3 e 4) ---------------- */
+
+function generateBeyond(room){
+  if(room.children===null) room.children = [];
+
+  if(room.kind==='entrance' && room.children.length===0){
+    const intro = TABLE2[roll()-1];
+    logEntry(`<span class="txt">Além da entrada: <b>${intro}</b>.</span>`);
+    document.getElementById('room-panel').insertAdjacentHTML('beforeend', `<p class="flavor">${intro}.</p>`);
+  }
+
+  let t3 = roll();
+  logEntry(`<b>Conexão</b> ${dieSpan(t3)}`);
+
+  if(t3===5 && state.gatePlaced){
+    let alt;
+    do{ alt = roll(); } while(alt===5);
+    logEntry(`<span class="txt">O portão rúnico já foi encontrado em outro lugar — nova rolagem: ${dieSpan(alt)}</span>`);
+    t3 = alt;
+  }
+
+  if(t3===6){
+    const c1 = generateArea(room, {});
+    const c2 = generateArea(room, {});
+    room.children.push(c1.id, c2.id);
+    room.connectionLabel = 'uma bifurcação';
+    logEntry('<span class="txt">O caminho se bifurca em duas direções desconhecidas.</span>');
+  } else if(t3===5){
+    state.gatePlaced = true;
+    const gate = makeRoom(room.id, 'gate', {depth:room.depth+1});
+    room.children.push(gate.id);
+    room.connectionLabel = 'um portão rúnico selado';
+    logEntry('<span class="txt">Ao fundo, um portão rúnico selado — precisará de três joias.</span>');
+  } else {
+    let door=null, label='';
+    if(t3===1){ label='uma passagem aberta'; }
+    else if(t3===2){ door={material:'madeira', locked:false, opened:true}; label='uma porta de madeira destrancada'; }
+    else if(t3===3){ door={material:'madeira', locked:true, ca:5, opened:false}; label='uma porta de madeira trancada (CA 5)'; }
+    else { door={material:'ferro', locked:true, ca:8, opened:false}; label='uma porta de ferro trancada (CA 8)'; }
+    const c = generateArea(room, {door});
+    room.children.push(c.id);
+    room.connectionLabel = label;
+    logEntry(`<span class="txt">Ao fundo: <b>${label}</b>.</span>`);
+  }
+
+  layoutMap(); renderMap();
+  showRoomNavActions(room);
+}
+
+function generateArea(parent, opts){
+  const t4 = roll();
+  const kind = AREA_KINDS[t4-1];
+  const room = makeRoom(parent.id, kind, {depth:(parent.depth||0)+1, door:opts.door||null});
+  if(kind==='deadend') room.children = [];
+  return room;
+}
+
+/* ---------------- eventos (tabela 5) ---------------- */
+
+function grantGold(room){
+  const gold = roll();
+  state.gold += gold; renderSheet();
+  document.getElementById('room-panel').insertAdjacentHTML('beforeend', `<p class="flavor">Você encontra <b>${gold} de ouro</b> espalhado no chão.</p>`);
+}
+
+function grantConsumable(room){
+  const pool = ['coquetel','lockpick','tocha'];
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+  if(state.backpack.consumables[pick]>0 || slotsUsed()<CAPACITY){
+    state.backpack.consumables[pick]++; renderSheet();
+    document.getElementById('room-panel').insertAdjacentHTML('beforeend', `<p class="flavor">Você encontra 1 <b>${CONSUMABLE_NAME[pick]}</b>.</p>`);
+  } else {
+    document.getElementById('room-panel').insertAdjacentHTML('beforeend', `<p class="flavor">Você encontra ${CONSUMABLE_NAME[pick]}, mas sua mochila está cheia — item perdido.</p>`);
+  }
+}
+
+function grantJewel(room){
+  const remaining = JEWEL_COLORS.filter(c=>!state.jewelsEverFound.includes(c));
+  if(remaining.length===0){
+    document.getElementById('room-panel').insertAdjacentHTML('beforeend', '<p class="flavor">Havia algo aqui, mas as três joias da masmorra já foram encontradas — só restam cacos sem valor.</p>');
+    logEntry('<span class="txt">Nada além de cacos — as três joias já foram encontradas.</span>');
+    return;
+  }
+  const color = remaining[Math.floor(Math.random()*remaining.length)];
+  state.jewels.push(color);
+  state.jewelsEverFound.push(color);
+  renderSheet();
+  logEntry(`<span class="txt good">Uma joia <b>${color.toLowerCase()}</b> reluz em sua mão — mais uma para o Portão Rúnico.</span>`,'good');
+  document.getElementById('room-panel').insertAdjacentHTML('beforeend', `<p class="flavor">Encravada numa fenda da parede: uma <b>joia ${color.toLowerCase()}</b>.</p>`);
+}
+
+function revealDarkFind(room){
+  const sub = roll();
+  logEntry(`<b>O que era?</b> ${dieSpan(sub)}`);
+  if(sub<=3){ grantConsumable(room); } else { grantJewel(room); }
+}
+
+function resolveEventRoll(room, r){
+  if(r===1 || r===2){
+    const enemyKey = r===1 ? 'esqueleto' : 'kobold';
+    logEntry(`<span class="txt">${enemyKey==='esqueleto' ? 'Um guarda esqueleto emerge das sombras.' : 'Um kobold salta de trás de uma coluna.'}</span>`);
+    startCombat(enemyKey, false);
+    return;
+  }
+  if(r===3){
+    document.getElementById('room-panel').insertAdjacentHTML('beforeend', '<p class="flavor">Nada acontece. Só o eco dos seus próprios passos.</p>');
+    if(room.event) room.event.resolved = true; else room.event = {resolved:true};
+    showRoomNavActions(room);
+    return;
+  }
+  if(r===4 || r===5 || r===6){
+    if(roomIsLit(room)){
+      if(r===4) grantGold(room);
+      else if(r===5) grantConsumable(room);
+      else grantJewel(room);
+    } else {
+      document.getElementById('room-panel').insertAdjacentHTML('beforeend', '<p class="flavor">Há algo brilhando no chão, mas está escuro demais para saber o que é. Acenda uma tocha.</p>');
+      room.pendingGrant = ()=> revealDarkFind(room);
+    }
+    if(room.event) room.event.resolved = true; else room.event = {resolved:true};
+    showRoomNavActions(room);
+    return;
+  }
+}
+
+/* ---------------- navegação ---------------- */
+
+function showRoomNavActions(room){
+  if(!state.inCombat && room.pendingGrant && roomIsLit(room)){
+    const g = room.pendingGrant;
+    room.pendingGrant = null;
+    g();
+  }
+
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+
+  const canExploreMore = room.kind!=='deadend' && room.kind!=='gate' && room.kind!=='boss';
+  const darkBlocked = room.kind==='dark' && !state.torchLit;
+
+  if(room.children && room.children.length){
+    room.children.forEach(cid=>{
+      const c = state.rooms[cid];
+      const lockedTag = (c.door && c.door.locked && !c.door.opened) ? ' [trancada]' : '';
+      const label = c.entered ? `Ir para: ${roomTitle(c)}${lockedTag}` : `Seguir caminho desconhecido${lockedTag}`;
+      actions.appendChild(mkButton(label, ()=>travelTo(c.id)));
+    });
+  }
+
+  if(canExploreMore){
+    const hasBranch = room.children && room.children.length>0;
+    const allowedByLimit = !hasBranch || room.kind==='entrance' || !room.extraExploreUsed;
+    if(allowedByLimit){
+      if(darkBlocked){
+        const b = mkButton('Explorar mais às cegas (requer tocha acesa)', ()=>{}, 'secondary');
+        b.disabled = true;
+        actions.appendChild(b);
+      } else {
+        const label = (room.kind==='entrance' && !hasBranch) ? 'Entrar na masmorra'
+          : (!hasBranch ? 'Explorar mais às cegas' : 'Explorar outra direção às cegas');
+        actions.appendChild(mkButton(label, ()=>{
+          if(hasBranch && room.kind!=='entrance') room.extraExploreUsed = true;
+          generateBeyond(room);
+        }));
+      }
+    }
+  }
+
+  if(room.parentId){
+    actions.appendChild(mkButton('Voltar', ()=>enterRoom(state.rooms[room.parentId]), 'secondary'));
+  }
+}
+
+/* ---------------- portão rúnico ---------------- */
+
+function renderGateRoom(room){
+  renderRoomPanel('Portão Rúnico', 'Um portão coberto de runas, selado por magia antiga. Três engastes vazios esperam joias.', []);
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  if(state.jewels.length>=3){
+    actions.appendChild(mkButton('Encaixar as três joias e abrir o portão', ()=>{
+      state.jewels = [];
+      renderSheet();
+      logEntry('<span class="txt good">O portão range e se abre. O ar muda — algo grande espera lá dentro.</span>','good');
+      const boss = makeRoom(room.id, 'boss', {depth:room.depth+1});
+      room.children = [boss.id];
+      layoutMap(); renderMap();
+      enterRoom(boss);
+    }));
+  } else {
+    document.getElementById('room-panel').insertAdjacentHTML('beforeend', `<p class="flavor">Faltam ${3-state.jewels.length} joia(s). Volte quando tiver as três.</p>`);
+  }
+  if(room.parentId) actions.appendChild(mkButton('Voltar', ()=>enterRoom(state.rooms[room.parentId]), 'secondary'));
+}
+
+/* ===================================================================
+   INIMIGOS / COMBATE
+=================================================================== */
+
+const ENEMIES = {
+  esqueleto:{
+    name:'Guarda Esqueleto', boss:false,
+    stats:{FOR:1,AGL:2,PRE:0,DUR:3},
+    weaponKey:'espada_enferrujada', armorKey:'armadura_enferrujada',
+    trait:'Imune a veneno. Ao cair a 0 PV pela primeira vez, reergue-se com metade do PV.',
+    loot:[{type:'weapon', key:'espada_enferrujada'},{type:'armor', key:'armadura_enferrujada'}]
+  },
+  kobold:{
+    name:'Kobold', boss:false,
+    stats:{FOR:2,AGL:3,PRE:1,DUR:0},
+    weaponKey:'maca', armorKey:'escudo_madeira',
+    trait:'1 em 6 de chance de aparar um ataque: anula o dano e contra-ataca na hora.',
+    loot:[{type:'weapon', key:'maca'},{type:'armor', key:'escudo_madeira'}]
+  },
+  ciclope:{
+    name:'Ciclope', boss:true,
+    stats:{FOR:3,AGL:1,PRE:3,DUR:6},
+    weaponKey:'martelo', armorKey:'capuz',
+    trait:'1 em 6 de chance de um bramido: cancela seu próximo turno, a menos que resista com teste de PRE.',
+    loot:[]
+  }
+};
+
+function effEnemyAGL(e){
+  const armor = ARMORS[e.armorKey];
+  return e.stats.AGL + (armor ? (armor.aglMod||0) : 0);
+}
+
+function spawnEnemy(key){
+  const base = ENEMIES[key];
+  const pvR = roll();
+  const caR = roll();
+  const armorAglMod = (ARMORS[base.armorKey] && ARMORS[base.armorKey].aglMod) || 0;
+  return {
+    key, name:base.name, boss:base.boss, stats:{...base.stats},
+    pv: base.stats.DUR + pvR, pvMax: base.stats.DUR + pvR,
+    ca: base.stats.AGL + armorAglMod + caR,
+    weaponKey: base.weaponKey, armorKey: base.armorKey,
+    trait: base.trait, loot: base.loot,
+    revived:false, fearApplied:false
+  };
+}
+
+function tickPerkCooldowns(){
+  if(state.perkCooldowns.mago>0) state.perkCooldowns.mago--;
+  if(state.perkCooldowns.warlock>0) state.perkCooldowns.warlock--;
+}
+
+async function startCombat(enemyKey, isBoss){
+  document.getElementById('actions').innerHTML = '';
+  state.inCombat = true;
+  renderRoomPVMarker();
+  state.combatFirstAttackDone = false;
+  state.cavaleiroGuardBonus = 0;
+  state.combatEnemy = spawnEnemy(enemyKey);
+  const e = state.combatEnemy;
+  document.getElementById('combat').classList.add('active');
+  renderCombat();
+  logEntry(`<span class="txt">PV do ${e.name}: ${e.pv} — CA: ${e.ca}</span>`);
+  await sleep(500);
+
+  const init = roll();
+  const playerFirst = init>3;
+  logEntry(`<b>Iniciativa</b> ${dieSpan(init)} <span class="txt">${playerFirst? 'Você age primeiro.' : 'O inimigo age primeiro.'}</span>`);
+  await sleep(600);
+
+  if(playerFirst){
+    renderCombatActions();
+  } else {
+    await enemyTurn();
+  }
+}
+
+function renderCombat(){
+  const e = state.combatEnemy;
+  const c = document.getElementById('combat');
+  const pvPctE = Math.max(0, Math.round(100*e.pv/e.pvMax));
+  const pvPctPlayer = Math.max(0, Math.round(100*state.pv/state.pvMax));
+  c.innerHTML = `
+    <div class="combat-vs">
+      <div class="enemy-box">
+        <h3>${e.name}${e.boss? ' — CHEFE':''}${e.poisoned? ' <span style="color:var(--acid);font-size:11px;">☠ envenenado</span>':''}</h3>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${pvPctE}%; background:var(--blood)"></div><div class="bar-label">PV ${Math.max(0,e.pv)} / ${e.pvMax}</div></div>
+        <div style="font-size:11.5px;color:var(--dim)">CA ${e.ca} · ${WEAPONS[e.weaponKey].name} · ${ARMORS[e.armorKey].name}</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:4px;">${e.trait}</div>
+      </div>
+      <div class="vs-mark">VS</div>
+      <div class="enemy-box" style="text-align:right;">
+        <h3 style="color:var(--acid)">Você</h3>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${pvPctPlayer}%"></div><div class="bar-label">PV ${Math.max(0,state.pv)} / ${state.pvMax}</div></div>
+        <div style="font-size:11.5px;color:var(--dim)">CA ${currentCA()}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCombatActions(){
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  const w = WEAPONS[state.weaponKey];
+
+  actions.appendChild(mkButton(`Atacar com ${w.name}`, playerAttack));
+
+  if(state.cls==='cavaleiro'){
+    actions.appendChild(mkButton('Guarda de Aço (rola d6, aumenta CA até o próximo turno)', async ()=>{
+      document.getElementById('actions').innerHTML = '';
+      const guardRoll = roll();
+      state.cavaleiroGuardBonus = guardRoll;
+      const critNote = guardRoll===6 ? ' Como caiu 6, isso também anula um crítico inimigo (d6=6) por completo.' : '';
+      logEntry(`<b>Guarda de Aço</b> ${dieSpan(guardRoll)} <span class="txt">CA sobe em ${guardRoll} até seu próximo turno (agora <b>${currentCA()}</b>). Se o próximo ataque inimigo rolar o mesmo d6, você contra-ataca.${critNote}</span>`,'good');
+      await sleep(500);
+      renderSheet();
+      await enemyTurn();
+    },'secondary'));
+  }
+  if(state.cls==='mago'){
+    if(state.perkCooldowns.mago<=0){
+      actions.appendChild(mkButton('Rajada Elemental', async ()=>{
+        document.getElementById('actions').innerHTML = '';
+        state.perkCooldowns.mago = 3;
+        logEntry(`<span class="txt"><b>Rajada Elemental</b>: dano mágico ignora armadura.</span>`);
+        const r = rollForPlayer('Rajada Elemental');
+        await sleep(500);
+        if(r===1){
+          logEntry(`<span class="txt dmg">A magia falha e explode em suas mãos! Você sofre <b>1</b> de dano.</span>`,'dmg');
+          state.pv -= 1;
+          renderSheet();
+          renderCombat();
+          await sleep(500);
+          checkDeath();
+          if(state.dead) return;
+          await enemyTurn();
+          return;
+        }
+        const dmg = r + effPRE();
+        logEntry(`<span class="txt">d6 ${r} + PRE ${effPRE()} = <b>${dmg}</b> de dano</span>`);
+        await sleep(450);
+        await applyDamageToEnemy(dmg, true);
+      },'secondary'));
+    } else {
+      const b = mkButton(`Rajada Elemental (recarrega em ${state.perkCooldowns.mago})`, ()=>{}, 'secondary');
+      b.disabled = true;
+      actions.appendChild(b);
+    }
+  }
+  if(state.cls==='warlock'){
+    if(state.perkCooldowns.warlock<=0 && !state._pactActive){
+      actions.appendChild(mkButton('Pacto Sombrio (vantagem + anula crítico inimigo)', async ()=>{
+        document.getElementById('actions').innerHTML = '';
+        state.perkCooldowns.warlock = 3;
+        state._pactActive = true;
+        logEntry(`<span class="txt good"><b>Pacto Sombrio</b> ativado: seu próximo ataque terá vantagem, e um crítico inimigo (d6=6) nesse meio-tempo será anulado.</span>`,'good');
+        await sleep(500);
+        await enemyTurn();
+      },'secondary'));
+    } else if(state.perkCooldowns.warlock>0){
+      const b = mkButton(`Pacto Sombrio (recarrega em ${state.perkCooldowns.warlock})`, ()=>{}, 'secondary');
+      b.disabled = true;
+      actions.appendChild(b);
+    }
+  }
+
+  actions.appendChild(mkButton('Fugir para trás (teste de AGL vs CA do inimigo)', attemptFlee, 'secondary'));
+}
+
+async function playerAttack(){
+  document.getElementById('actions').innerHTML = '';
+  const w = WEAPONS[state.weaponKey];
+  const e = state.combatEnemy;
+  let advantage = false;
+  let advantageReason = '';
+  if(state.cls==='ladino' && !state.combatFirstAttackDone){ advantage = true; advantageReason = 'Golpe Furtivo'; }
+  if(state._pactActive){ advantage = true; advantageReason = 'Pacto Sombrio'; }
+
+  if(advantage){
+    logEntry(`<span class="txt"><b>${advantageReason}</b>: rolagem de ataque com vantagem (2d6, usa o maior).</span>`);
+    await sleep(350);
+  }
+
+  const atkRoll = rollForPlayer('Ataque', {advantage});
+  if(state._pactActive) state._pactActive = false;
+  state.combatFirstAttackDone = true;
+
+  const isCrit = atkRoll===6;
+  const total = atkRoll + effAGL();
+  const mirCerteira = state.cls==='cacador' && state.weaponKey==='arco';
+  const autoHit = isCrit || mirCerteira;
+  const hit = autoHit || total>=e.ca;
+
+  await sleep(450);
+  logEntry(`<span class="txt">Acerto: d6 ${atkRoll} + AGL ${effAGL()} = <b>${total}</b> vs CA ${e.ca}</span>`);
+  await sleep(400);
+
+  if(isCrit){
+    logEntry(`<span class="txt" style="color:var(--blue)"><b>CRÍTICO!</b> Ignora CA (acerto automático) e ignora armadura no dano.</span>`);
+    await sleep(400);
+  } else if(mirCerteira && total<e.ca){
+    logEntry(`<span class="txt"><b>Mira Certeira</b>: acerto automático com Arco (ignora CA).</span>`);
+    await sleep(400);
+  }
+  logEntry(`<span class="txt">${hit? '<b style="color:var(--acid)">Acerto!</b>' : '<b style="color:var(--blood)">Erro.</b>'}</span>`);
+  await sleep(400);
+
+  const isArco = state.weaponKey==='arco';
+
+  if(!hit){
+    if(isArco && state.weaponPoisoned){
+      state.weaponPoisoned = false;
+      renderSheet();
+      logEntry(`<span class="txt">O veneno se perde junto com a flecha que errou o alvo.</span>`);
+      await sleep(400);
+    }
+    await enemyTurn();
+    return;
+  }
+
+  if(e.key==='kobold' && roll()===1){
+    logEntry(`<span class="txt dmg">O kobold apara o golpe e contra-ataca!</span>`,'dmg');
+    await sleep(500);
+    await enemyTurn(true);
+    return;
+  }
+
+  let dmgRoll;
+  if(isCrit && w.critAdvantage){
+    const d1 = roll(), d2 = roll();
+    dmgRoll = Math.max(d1, d2);
+    logEntry(`<span class="txt">Crítico com ${w.name}: 2 rolagens de dano ${dieSpan(d1)} ${dieSpan(d2)} — usa a maior (<b>${dmgRoll}</b>)</span>`);
+    await sleep(400);
+  } else {
+    dmgRoll = roll();
+  }
+  let dmg = dmgRoll + w.n + state.stats.FOR;
+  logEntry(`<span class="txt">Dano base: d6 ${dmgRoll} + arma (${w.name}) ${w.n} + FOR ${state.stats.FOR} = <b>${dmg}</b></span>`);
+  await sleep(400);
+
+  if(state.cls==='barbaro' && state.pv <= state.pvMax/2){
+    dmg += 2;
+    logEntry(`<span class="txt"><b>Fúria de Sangue</b>: PV ≤ metade do máximo, +2 de dano → <b>${dmg}</b></span>`);
+    await sleep(380);
+  }
+  if(mirCerteira){
+    dmg += 1;
+    logEntry(`<span class="txt"><b>Mira Certeira</b>: +1 de dano fixo com Arco → <b>${dmg}</b></span>`);
+    await sleep(380);
+  }
+
+  await sleep(300);
+  const result = await dealDamageToEnemyCore(dmg, isCrit);
+
+  if(state.weaponPoisoned){
+    const penetrated = result.finalDamage > 0;
+    const consumeNow = isArco || penetrated;
+    if(consumeNow){
+      state.weaponPoisoned = false;
+      renderSheet();
+      if(penetrated){
+        if(e.key==='esqueleto'){
+          logEntry(`<span class="txt">O veneno não tem efeito — ${e.name} é imune a veneno.</span>`);
+        } else if(result.status!=='dead'){
+          e.poisoned = true;
+          logEntry(`<span class="txt good"><b>Veneno Raro</b>: o dano penetrou a armadura — ${e.name} foi envenenado, perderá 1 PV a cada turno.</span>`,'good');
+        }
+      } else {
+        logEntry(`<span class="txt">A flecha envenenada não penetrou a armadura — o veneno se perde de qualquer forma.</span>`);
+      }
+      await sleep(400);
+    } else {
+      logEntry(`<span class="txt">O veneno na lâmina permanece — o golpe não penetrou a armadura.</span>`);
+      await sleep(300);
+    }
+  }
+
+  if(result.status==='dead'){ await winCombat(); return; }
+  await enemyTurn();
+}
+
+async function dealDamageToEnemyCore(dmg, ignoreArmor){
+  const e = state.combatEnemy;
+  const armorVal = ARMORS[e.armorKey].reduce;
+  const applied = ignoreArmor ? 0 : armorVal;
+
+  if(ignoreArmor && armorVal>0){
+    logEntry(`<span class="txt">Ignora a ${ARMORS[e.armorKey].name} do ${e.name} (-${armorVal} anulado).</span>`);
+    await sleep(350);
+  } else if(applied>0){
+    logEntry(`<span class="txt">${ARMORS[e.armorKey].name} do ${e.name} reduz ${applied} de dano.</span>`);
+    await sleep(350);
+  }
+
+  const final = Math.max(0, dmg - applied);
+  e.pv -= final;
+  logEntry(`<span class="txt dmg">${e.name} sofre <b>${final}</b> de dano${applied>0? ` (${dmg} bruto − ${applied} armadura)`:''}.</span>`,'dmg');
+  renderCombat();
+  await sleep(550);
+
+  if(e.pv<=0){
+    if(e.key==='esqueleto' && !e.revived){
+      e.revived = true;
+      e.pv = Math.ceil(e.pvMax/2);
+      logEntry(`<span class="txt dmg">O Guarda Esqueleto desmorona... e se reergue com metade do PV.</span>`,'dmg');
+      renderCombat();
+      await sleep(650);
+      return {status:'revived', finalDamage:final};
+    }
+    return {status:'dead', finalDamage:final};
+  }
+  return {status:'alive', finalDamage:final};
+}
+
+async function applyDamageToEnemy(dmg, ignoreArmor){
+  const result = await dealDamageToEnemyCore(dmg, ignoreArmor);
+  if(result.status==='dead'){ await winCombat(); return; }
+  await enemyTurn();
+}
+
+async function enemyTurn(skipRoar){
+  if(state.dead) return;
+  document.getElementById('actions').innerHTML = '';
+  const e = state.combatEnemy;
+
+  if(e.key==='ciclope' && !skipRoar && roll()===1){
+    await enemyTurn(true);
+    await sleep(550);
+    logEntry(`<span class="txt dmg">O Ciclope solta um bramido ensurdecedor!</span>`,'dmg');
+    await sleep(550);
+    const r = rollForPlayer('Resistir ao medo — PRE');
+    const total = r + effPRE();
+    await sleep(350);
+    logEntry(`<span class="txt">Resistência: d6 ${r} + PRE ${effPRE()} = <b>${total}</b> vs 8</span>`);
+    await sleep(450);
+    if(total<8){
+      logEntry(`<span class="txt dmg">Você congela de medo — turno perdido. O Ciclope aproveita e ataca de novo.</span>`,'dmg');
+      await sleep(500);
+      await enemyTurn(true);
+      return;
+    } else {
+      logEntry(`<span class="txt good">Você resiste ao pavor.</span>`,'good');
+      await sleep(400);
+    }
+  }
+
+  const guardBonusForThisAttack = state.cls==='cavaleiro' ? state.cavaleiroGuardBonus : 0;
+
+  const w = WEAPONS[e.weaponKey];
+  const atkRoll = roll();
+  let isCrit = atkRoll===6;
+  let pactNullified = false;
+  let guardCritNullified = false;
+  if(isCrit && state._pactActive){
+    isCrit = false;
+    pactNullified = true;
+  } else if(isCrit && guardBonusForThisAttack===6){
+    isCrit = false;
+    guardCritNullified = true;
+  }
+  const total = atkRoll + effEnemyAGL(e);
+  const ca = currentCA();
+  const hit = isCrit || total>=ca;
+  logEntry(`<b>${e.name} ataca</b> ${dieSpan(atkRoll,{crit:atkRoll===6,bad:atkRoll===1})} <span class="txt">d6 ${atkRoll} + AGL ${effEnemyAGL(e)} = <b>${total}</b> vs sua CA ${ca}</span>`);
+  await sleep(450);
+
+  if(pactNullified){
+    logEntry(`<span class="txt good"><b>Pacto Sombrio</b> anula o crítico do ${e.name} (d6=6) — tratado como acerto normal, sem ignorar CA ou armadura.</span>`,'good');
+    await sleep(450);
+  } else if(guardCritNullified){
+    logEntry(`<span class="txt good"><b>Guarda de Aço</b> (d6=6) anula o crítico do ${e.name} — sem ignorar CA ou armadura, e você contra-ataca em seguida.</span>`,'good');
+    await sleep(450);
+  } else if(isCrit){
+    logEntry(`<span class="txt" style="color:var(--blue)"><b>CRÍTICO!</b> Ignora sua CA (acerto automático) e sua armadura no dano.</span>`);
+    await sleep(400);
+  }
+  logEntry(`<span class="txt">${hit? '<b style="color:var(--blood)">Acerto.</b>':'<b style="color:var(--acid)">Erro.</b>'}</span>`);
+  await sleep(400);
+
+  if(hit){
+    let dmgRoll;
+    if(isCrit && w.critAdvantage){
+      const d1 = roll(), d2 = roll();
+      dmgRoll = Math.max(d1, d2);
+      logEntry(`<span class="txt">Crítico do ${e.name}: 2 rolagens de dano ${dieSpan(d1)} ${dieSpan(d2)} — usa a maior (<b>${dmgRoll}</b>)</span>`);
+      await sleep(380);
+    } else {
+      dmgRoll = roll();
+    }
+    let dmg = dmgRoll + w.n + e.stats.FOR;
+    logEntry(`<span class="txt">Dano do ${e.name}: d6 ${dmgRoll} + arma (${w.name}) ${w.n} + FOR ${e.stats.FOR} = <b>${dmg}</b></span>`);
+    await sleep(400);
+
+    const armorVal = ARMORS[state.armorKey].reduce;
+    const applied = isCrit ? 0 : armorVal;
+    if(isCrit && armorVal>0){
+      logEntry(`<span class="txt">Ignora sua ${ARMORS[state.armorKey].name} (-${armorVal} anulado).</span>`);
+      await sleep(350);
+    } else if(applied>0){
+      logEntry(`<span class="txt">Sua ${ARMORS[state.armorKey].name} reduz ${applied} de dano.</span>`);
+      await sleep(350);
+    }
+
+    const finalDmg = Math.max(0, dmg - applied);
+    state.pv -= finalDmg;
+    logEntry(`<b>Você sofre</b> <span class="txt dmg"><b>${finalDmg}</b> de dano${applied>0? ` (${dmg} bruto − ${applied} armadura)`:''}.</span>`,'dmg');
+    renderSheet();
+    renderCombat();
+    await sleep(550);
+  }
+
+  if(guardBonusForThisAttack>0 && atkRoll===guardBonusForThisAttack){
+    if(!guardCritNullified){
+      logEntry(`<span class="txt good"><b>Guarda de Aço</b>: o d6 do ${e.name} (${atkRoll}) igualou o seu (${guardBonusForThisAttack}) — contra-ataque passivo!</span>`,'good');
+      await sleep(450);
+    }
+    const w2 = WEAPONS[state.weaponKey];
+    const dmgRoll2 = roll();
+    const dmg2 = dmgRoll2 + w2.n + state.stats.FOR;
+    logEntry(`<span class="txt">Contra-ataque: d6 ${dmgRoll2} + arma (${w2.name}) ${w2.n} + FOR ${state.stats.FOR} = <b>${dmg2}</b></span>`);
+    await sleep(400);
+    const counterResult = await dealDamageToEnemyCore(dmg2, false);
+    if(counterResult.status==='dead'){
+      state.cavaleiroGuardBonus = 0;
+      await winCombat();
+      return;
+    }
+  }
+
+  state.cavaleiroGuardBonus = 0;
+
+  const poisonKilled = await tickPoison();
+  if(poisonKilled){ await winCombat(); return; }
+
+  renderSheet();
+  checkDeath();
+  if(!state.dead){
+    tickPerkCooldowns();
+    renderCombatActions();
+  }
+}
+
+async function tickPoison(){
+  const e = state.combatEnemy;
+  if(!e || !e.poisoned) return false;
+  e.pv -= 1;
+  logEntry(`<span class="txt dmg">O veneno consome <b>1</b> PV de ${e.name}.</span>`,'dmg');
+  renderCombat();
+  await sleep(400);
+  if(e.pv<=0){
+    if(e.key==='esqueleto' && !e.revived){
+      e.revived = true;
+      e.pv = Math.ceil(e.pvMax/2);
+      logEntry(`<span class="txt dmg">O Guarda Esqueleto desmorona... e se reergue com metade do PV.</span>`,'dmg');
+      renderCombat();
+      await sleep(650);
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+async function attemptFlee(){
+  document.getElementById('actions').innerHTML = '';
+  const e = state.combatEnemy;
+  const r = rollForPlayer('Fuga — AGL');
+  const total = r + effAGL();
+  await sleep(500);
+  logEntry(`<span class="txt">d6 ${r} + AGL ${effAGL()} = <b>${total}</b> vs CA ${e.ca}</span>`);
+  await sleep(450);
+  if(total>=e.ca){
+    logEntry(`<span class="txt good">Você se desvencilha e recua.</span>`,'good');
+    await sleep(450);
+    const room = state.rooms[state.currentRoomId];
+    endCombatUI();
+    if(room.parentId) enterRoom(state.rooms[room.parentId]);
+    else showRoomNavActions(room);
+  } else {
+    logEntry(`<span class="txt">Não há como escapar — o combate continua.</span>`);
+    await sleep(450);
+    await enemyTurn();
+  }
+}
+
+async function winCombat(){
+  const e = state.combatEnemy;
+  logEntry(`<span class="txt good"><b>${e.name} derrotado.</b></span>`,'good');
+  await sleep(500);
+  const room = state.rooms[state.currentRoomId];
+
+  if(e.boss){
+    room.won = true;
+    endCombatUI();
+    victory();
+    return;
+  }
+
+  endCombatUI();
+  if(room.event) room.event.resolved = true; else room.event = {resolved:true};
+
+  grantLoot(room, e, ()=>{
+    const followup = roll();
+    logEntry(`<b>Novo evento (recompensa da luta)</b> ${dieSpan(followup)}`);
+    resolveEventRoll(room, followup);
+  });
+}
+
+function grantLoot(room, enemy, then){
+  if(!enemy.loot || !enemy.loot.length){ then(); return; }
+  const drop = enemy.loot[Math.floor(Math.random()*enemy.loot.length)];
+  const item = drop.type==='weapon' ? WEAPONS[drop.key] : ARMORS[drop.key];
+
+  if(!roomIsLit(room)){
+    logEntry(`<span class="txt">Está escuro demais para revistar o corpo agora — acenda uma tocha para recolher <b>${item.name}</b> depois.</span>`);
+    room.pendingGrant = ()=> offerItemChoice(drop, ()=>{});
+    then();
+    return;
+  }
+  offerItemChoice(drop, then);
+}
+
+function offerItemChoice(drop, then){
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  const isWeapon = drop.type==='weapon';
+  const item = isWeapon ? WEAPONS[drop.key] : ARMORS[drop.key];
+  document.getElementById('room-panel').insertAdjacentHTML('beforeend', `<p class="flavor">Item recolhido do corpo: <b>${item.name}</b>.</p>`);
+  const meetsReq = isWeapon ? meetsWeaponReq(item) : meetsArmorReq(item);
+
+  if(meetsReq){
+    actions.appendChild(mkButton(`Equipar ${item.name} agora`, ()=>{
+      const old = isWeapon ? state.weaponKey : state.armorKey;
+      if(isWeapon) state.weaponKey = drop.key; else state.armorKey = drop.key;
+      if(old && !(isWeapon && old==='desarmado')){
+        if(slotsUsed()<CAPACITY){ if(isWeapon) state.backpack.weapons.push(old); else state.backpack.armors.push(old); }
+        else logEntry(`<span class="txt">Sem espaço — o equipamento anterior foi deixado para trás.</span>`);
+      }
+      renderSheet();
+      actions.innerHTML = '';
+      then();
+    }));
+  }
+  if(slotsUsed() < CAPACITY){
+    actions.appendChild(mkButton('Guardar na mochila', ()=>{
+      if(isWeapon) state.backpack.weapons.push(drop.key); else state.backpack.armors.push(drop.key);
+      renderSheet();
+      logEntry(`<span class="txt">Guardado na mochila: ${item.name}.</span>`);
+      actions.innerHTML = '';
+      then();
+    },'secondary'));
+  }
+  actions.appendChild(mkButton('Deixar para trás', ()=>{ actions.innerHTML=''; then(); },'secondary'));
+}
+
+function endCombatUI(){
+  state.inCombat = false;
+  state.combatEnemy = null;
+  state._pactActive = false;
+  document.getElementById('combat').classList.remove('active');
+  renderRoomPVMarker();
+}
+
+function checkDeath(){
+  if(state.pv<=0 && !state.dead){
+    state.dead = true;
+    logEntry(`<span class="txt dmg"><b>Você cai.</b></span>`,'dmg');
+    showEnd(false);
+  }
+}
+
+function victory(){
+  state.victorious = true;
+  logEntry(`<span class="txt good"><b>O Ciclope tomba. O Tesouro é seu.</b></span>`,'good');
+  showEnd(true);
+}
+
+function showEnd(won){
+  document.getElementById('combat').classList.remove('active');
+
+  if(!won){
+    showDeathOverlay();
+    return;
+  }
+
+  const roomsExplored = Object.values(state.rooms).filter(r=>r.entered).length;
+  const text = `Você atravessou ${roomsExplored} salas, carregando ${state.gold} de ouro, e saiu vivo pela porta que poucos encontram do lado de fora.`;
+
+  document.getElementById('room-panel').innerHTML = `
+    <div class="room-title" style="color:var(--acid)">O TESOURO É SEU</div>
+    <p>${text}</p>
+    <p class="flavor">O registro completo da sua jornada continua abaixo, sem pressa para rolar.</p>
+  `;
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  actions.appendChild(mkButton('Nova descida', restartGame));
+}
+
+function showDeathOverlay(){
+  const old = document.getElementById('death-overlay');
+  if(old) old.remove();
+
+  const roomsExplored = Object.values(state.rooms).filter(r=>r.entered).length;
+  const overlay = document.createElement('div');
+  overlay.id = 'death-overlay';
+  overlay.innerHTML = `
+    <div class="death-content">
+      <h1>VOCÊ MORREU</h1>
+      <p class="death-text">Você chegou a ${roomsExplored} salas, com ${state.gold} de ouro nas mãos, antes que a masmorra fechasse ao seu redor.</p>
+      <div class="death-actions">
+        <button id="death-restart">Nova descida</button>
+        <button class="secondary" id="death-history-toggle">Ver histórico</button>
+      </div>
+      <div id="death-history">
+        <div id="death-history-log"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const liveLog = document.getElementById('log');
+  document.getElementById('death-history-log').innerHTML = liveLog ? liveLog.innerHTML : '';
+
+  document.getElementById('death-restart').onclick = ()=>{
+    overlay.remove();
+    restartGame();
+  };
+  document.getElementById('death-history-toggle').onclick = ()=>{
+    const hist = document.getElementById('death-history');
+    const toggleBtn = document.getElementById('death-history-toggle');
+    hist.classList.toggle('expanded');
+    toggleBtn.textContent = hist.classList.contains('expanded') ? 'Ocultar histórico' : 'Ver histórico';
+  };
+}
+
+function restartGame(){
+  const overlay = document.getElementById('death-overlay');
+  if(overlay) overlay.remove();
+
+  state = newState();
+
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('setup').classList.remove('hidden');
+
+  document.querySelectorAll('.class-card').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('room-panel').innerHTML = '';
+  document.getElementById('combat').innerHTML = '';
+  document.getElementById('combat').classList.remove('active');
+  document.getElementById('actions').innerHTML = '';
+  document.getElementById('map-card').innerHTML = '';
+
+  renderStatRow();
+  renderEquipmentGrids();
+  checkSetupReady();
+  updateTaskbar();
+}
+
+/* ===================================================================
+   SISTEMA DE JANELAS (arrastar, sobrepor, minimizar)
+=================================================================== */
+
+let winZTop = 10;
+let winsInitialized = false;
+let layoutApplied = false;
+
+function bringWindowToFront(winEl){
+  winZTop++;
+  winEl.style.zIndex = winZTop;
+}
+
+function initWindowSystem(){
+  if(winsInitialized) return;
+  winsInitialized = true;
+
+  document.querySelectorAll('#desktop .win').forEach((winEl, idx)=>{
+    winEl.style.zIndex = 10 + idx;
+    const titlebar = winEl.querySelector('.win-titlebar');
+    const minBtn = winEl.querySelector('.win-min');
+    let dragging = false, pointerId = null;
+    let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+    titlebar.addEventListener('pointerdown', (e)=>{
+      if(e.target === minBtn) return;
+      bringWindowToFront(winEl);
+      dragging = true;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = winEl.offsetLeft;
+      startTop = winEl.offsetTop;
+      if(titlebar.setPointerCapture){
+        try{ titlebar.setPointerCapture(pointerId); }catch(err){}
+      }
+      e.preventDefault();
+    });
+    titlebar.addEventListener('pointermove', (e)=>{
+      if(!dragging || e.pointerId!==pointerId) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      winEl.style.left = Math.max(0, startLeft + dx) + 'px';
+      winEl.style.top = Math.max(0, startTop + dy) + 'px';
+    });
+    const stopDrag = (e)=>{ if(pointerId!==null){ dragging = false; } };
+    titlebar.addEventListener('pointerup', stopDrag);
+    titlebar.addEventListener('pointercancel', stopDrag);
+
+    winEl.addEventListener('pointerdown', ()=> bringWindowToFront(winEl));
+
+    minBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      winEl.classList.toggle('minimized');
+      updateTaskbar();
+    });
+  });
+}
+
+function updateTaskbar(){
+  const bar = document.getElementById('taskbar');
+  if(!bar) return;
+  bar.innerHTML = '';
+  document.querySelectorAll('#desktop .win.minimized').forEach(winEl=>{
+    const title = winEl.querySelector('.win-title').textContent;
+    const item = document.createElement('div');
+    item.className = 'taskbar-item';
+    item.textContent = title;
+    item.onclick = ()=>{
+      winEl.classList.remove('minimized');
+      bringWindowToFront(winEl);
+      updateTaskbar();
+    };
+    bar.appendChild(item);
+  });
+}
+
+function layoutDefaultWindows(){
+  const desktop = document.getElementById('desktop');
+  const winSheet = document.getElementById('win-sheet');
+  const winMap = document.getElementById('win-map');
+  const winRoom = document.getElementById('win-room');
+  const winActions = document.getElementById('win-actions');
+  const winLog = document.getElementById('win-log');
+  const isNarrow = window.innerWidth < 900;
+
+  if(isNarrow){
+    const w = Math.max(230, Math.min(window.innerWidth - 24, 440));
+    const heights = [420, 220, 320, 150, 280];
+    const wins = [winSheet, winMap, winRoom, winActions, winLog];
+    let y = 12;
+    wins.forEach((el, i)=>{
+      el.style.left = '10px';
+      el.style.top = y + 'px';
+      el.style.width = w + 'px';
+      el.style.height = heights[i] + 'px';
+      y += heights[i] + 14;
+    });
+    desktop.style.minHeight = (y + 80) + 'px';
+  } else {
+    winSheet.style.left='16px';   winSheet.style.top='16px';  winSheet.style.width='300px';  winSheet.style.height='560px';
+    winMap.style.left='332px';    winMap.style.top='16px';    winMap.style.width='420px';    winMap.style.height='230px';
+    winRoom.style.left='332px';   winRoom.style.top='262px';  winRoom.style.width='420px';   winRoom.style.height='360px';
+    winActions.style.left='332px';winActions.style.top='638px';winActions.style.width='420px';winActions.style.height='140px';
+    winLog.style.left='768px';    winLog.style.top='16px';    winLog.style.width='360px';    winLog.style.height='600px';
+    desktop.style.minHeight = '820px';
+  }
+}
+
+/* ===================================================================
+   INIT
+=================================================================== */
+
+state = newState();
+renderClassGrid();
+renderStatRow();
+renderEquipmentGrids();
+</script>
+</body>
+</html>
