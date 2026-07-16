@@ -36,7 +36,7 @@ DELVE6 foi desenhado para **campanhas solo**: o mínimo de recurso necessário p
 
 ## Como jogar (versão digital)
 
-Não há instalação, servidor ou build. Basta abrir `delve6.html` em qualquer navegador moderno (Chrome, Firefox, Edge, Safari).
+Não há instalação, servidor ou build. Basta abrir `index.html` em qualquer navegador moderno (Chrome, Firefox, Edge, Safari).
 
 1. Escolha uma classe.
 2. Distribua os quatro modificadores (FOR, AGL, PRE, DUR) entre os valores **3, 2, 1, 0**, sem repetição.
