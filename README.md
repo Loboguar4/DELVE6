@@ -8,6 +8,12 @@ Este repositório contém o **livro de regras core** (`delve6-book.html`) e uma 
 
 ---
 
+## Jogar agora:
+
+<https://loboguar4.github.io/DELVE6/>
+
+---
+
 ## Manifesto
 
 1. Um único dado.
@@ -28,7 +34,7 @@ DELVE6 foi desenhado para **campanhas solo**: o mínimo de recurso necessário p
 | Arquivo | O que é |
 |---|---|
 | [`delve6.txt`](./delve6.txt) | O livro de regras core: manifesto, gerador de masmorra, classes, combate, itens e inimigos. |
-| [`delve6-book.html`](./delve6.txt) | O livro de regras core: manifesto, gerador de masmorra, classes, combate, itens e inimigos. |
+| [`delve6-book.html`](./delve6-book.html) | O livro de regras core em HTML. |
 | [`index.html`](./index.html) | Implementação jogável de *The Forgotten Vault* — um crawler de masmorra completo, rodando inteiramente no navegador. |
 | `README.md` | Este documento. |
 | `LICENSE` | Licença MIT. |
@@ -37,7 +43,7 @@ DELVE6 foi desenhado para **campanhas solo**: o mínimo de recurso necessário p
 
 ## Como jogar (versão digital)
 
-Não há instalação, servidor ou build. Basta abrir `delve6.html` em qualquer navegador moderno (Chrome, Firefox, Edge, Safari).
+Não há instalação, servidor ou build. Basta abrir `index.html` em qualquer navegador moderno (Chrome, Firefox, Edge, Safari).
 
 1. Escolha uma classe.
 2. Distribua os quatro modificadores (FOR, AGL, PRE, DUR) entre os valores **3, 2, 1, 0**, sem repetição.
@@ -173,9 +179,11 @@ Na versão em HTML, classes, armas, armaduras e inimigos vivem em objetos JavaSc
 
 ## Licença
 
-Este projeto é distribuído sob a **Licença MIT** — veja [`LICENSE`](./LICENSE) para o texto completo.
+Este projeto interativo em HTML é distribuído sob a **Licença MIT** — veja [`LICENSE`](./LICENSE) para o texto completo.
 
-Copyright (c) Bandeirinha
+O livro é licenciado sob Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+© 2026 Ashen Desk. DELVE6™ and its logo are trademarks of Ashen Desk
 
 ## Créditos
 
