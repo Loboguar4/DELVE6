@@ -2,9 +2,9 @@
 
 **Um dado. Uma chance. Caminhos infinitos.**
 
-DELVE6 é um sistema OSR ultraminimalista construído em torno de uma única premissa: **tudo se resolve com um d6**. Sem tabelas de múltiplos dados, sem fichas complexas — só um dado de seis lados, papel, caneta, e uma masmorra gerada proceduralmente à sua frente.
+DELVE6 é um sistema OSR ultraminimalista construído em torno de uma única premissa: **tudo se resolve com um d6**. Sem tabelas de múltiplos dados, sem fichas complexas — só um dado de seis lados, papel, lápis, e uma masmorra gerada proceduralmente à sua frente.
 
-Este repositório contém o **livro de regras core** (`delve6.txt`) e uma **implementação jogável em navegador** (`index.html`) do primeiro módulo, *The Forgotten Vault*.
+Este repositório contém o **livro de regras core** (`delve6-book.html`) e uma **implementação jogável em navegador** (`index.html`) do primeiro módulo, *The Forgotten Vault*.
 
 ---
 
@@ -28,6 +28,7 @@ DELVE6 foi desenhado para **campanhas solo**: o mínimo de recurso necessário p
 | Arquivo | O que é |
 |---|---|
 | [`delve6.txt`](./delve6.txt) | O livro de regras core: manifesto, gerador de masmorra, classes, combate, itens e inimigos. |
+| [`delve6-book.html`](./delve6.txt) | O livro de regras core: manifesto, gerador de masmorra, classes, combate, itens e inimigos. |
 | [`index.html`](./index.html) | Implementação jogável de *The Forgotten Vault* — um crawler de masmorra completo, rodando inteiramente no navegador. |
 | `README.md` | Este documento. |
 | `LICENSE` | Licença MIT. |
@@ -36,7 +37,7 @@ DELVE6 foi desenhado para **campanhas solo**: o mínimo de recurso necessário p
 
 ## Como jogar (versão digital)
 
-Não há instalação, servidor ou build. Basta abrir `index.html` em qualquer navegador moderno (Chrome, Firefox, Edge, Safari).
+Não há instalação, servidor ou build. Basta abrir `delve6.html` em qualquer navegador moderno (Chrome, Firefox, Edge, Safari).
 
 1. Escolha uma classe.
 2. Distribua os quatro modificadores (FOR, AGL, PRE, DUR) entre os valores **3, 2, 1, 0**, sem repetição.
@@ -49,7 +50,7 @@ A interface é organizada em **janelas independentes** — Ficha, Mapa da Masmor
 
 ## Recursos implementados na versão digital
 
-- **Geração procedural completa** do algoritmo de masmorra descrito em `d6.txt`: saguões, corredores, armadilhas, salas escuras, prisões, portas trancadas, bifurcações e o Portão Rúnico.
+- **Geração procedural completa** do algoritmo de masmorra descrito em `delve6.txt` e `delve6-book.html`: saguões, corredores, armadilhas, salas escuras, prisões, portas trancadas, bifurcações e o Portão Rúnico.
 - **Movimentação restrita a salas adjacentes**, com mapa que só revela o tipo de cada sala depois que ela é visitada.
 - **Backtracking com risco**: revisitar uma sala já explorada rola 1d6 — valores baixos trazem de volta um inimigo comum.
 - **Tochas com durabilidade** (d6 salas/movimentações), necessárias para lutar sem desvantagem e para coletar itens escondidos no escuro.
@@ -64,7 +65,7 @@ A interface é organizada em **janelas independentes** — Ficha, Mapa da Masmor
 
 ## Regras principais (resumo)
 
-Para as regras completas e o texto original, veja [`delve6.txt`](./delve6.txt). Resumo de referência rápida:
+Para as regras completas e o texto original, veja [`delve6.txt`](./d6.txt) ou [`delve6-book.html`](./delve6-book.html). Resumo de referência rápida:
 
 ### Atributos
 
@@ -132,13 +133,13 @@ Usar qualquer consumível durante o combate gasta o turno.
 - **Lutar no escuro** aplica desvantagem (rola dois d6, usa o menor) em rolagens de ataque.
 - **Fugir** testa AGL vs a CA do inimigo.
 
-### Inimigos
+### Inimigos 
 
 | Inimigo | FOR | AGL | PRE | DUR | Traço |
 |---|---|---|---|---|---|
-| Guarda Esqueleto | 2 | 2 | 1 | 3 | Imune a veneno; ao cair, reergue-se com metade do PV (+1 se ímpar) |
-| Kobold | 2 | 3 | 1 | 0 | 1 em 6 de aparar um ataque, anulando o dano e contra-atacando |
-| Ciclope (chefe) | 3 | 1 | 3 | 6 | 1 em 6 de rugido que cancela o turno do jogador (teste de PRE resiste) |
+| Guarda Esqueleto | 1 | 2 | 0 | 3 | Imune a veneno; ao cair, reergue-se com metade do PV (+1 se ímpar) |
+| Kobold | 2 | 3 | 0 | 1 | 1 em 6 de aparar um ataque, anulando o dano e contra-atacando |
+| Ciclope (chefe) | 3 | 3 | 3 | 6 | 1 em 6 de rugido que cancela o turno do jogador (teste de PRE resiste) |
 
 ---
 

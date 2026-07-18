@@ -354,7 +354,7 @@ button.small{padding:4px 8px;font-size:10.5px;}
     <div id="taskbar"></div>
   </section>
 
-  <div class="footer-note">DELVE6 — inspirado em Mörk Borg &amp; OD&amp;D — feito com um dado só</div>
+  <div class="footer-note">DELVE6™ and its logo are trademarks of Ashen Desk.</div>
 </div>
 
 <script>
@@ -419,10 +419,11 @@ const WEAPONS = {
   espadaCurta:{name:'Espada Curta', n:2, req:0},
   espadaLonga:{name:'Espada Longa', n:3, req:2},
   martelo:{name:'Martelo de Guerra', n:4, req:3},
-  //martelo_madeira:{name:'Martelo de Guerra', n:4, req:3},
+  chave_gigantesca:{name:'Chave Gigantesca', n:4, req:3},
   arco:{name:'Arco', n:1, req:0, reqAgl:2, critAdvantage:true},
   espada_enferrujada:{name:'Espada Enferrujada', n:1, req:0},
   maca:{name:'Maça', n:2, req:0}
+
 };
 
 const ARMORS = {
@@ -1423,17 +1424,17 @@ const ENEMIES = {
   },
   kobold:{
     name:'Kobold', boss:false,
-    stats:{FOR:2,AGL:3,PRE:1,DUR:0},
+    stats:{FOR:2,AGL:3,PRE:0,DUR:1},
     weaponKey:'maca', armorKey:'escudo_madeira',
     trait:'1 em 6 de chance de aparar um ataque: anula o dano e contra-ataca na hora.',
     loot:[{type:'weapon', key:'maca'},{type:'armor', key:'escudo_madeira'}]
   },
   ciclope:{
     name:'Ciclope', boss:true,
-    stats:{FOR:3,AGL:1,PRE:3,DUR:6},
-    weaponKey:'martelo', armorKey:'capuz',
+    stats:{FOR:3,AGL:3,PRE:3,DUR:6},
+    weaponKey:'chave_gigantesca', armorKey:'capuz',
     trait:'1 em 6 de chance de um bramido: cancela seu próximo turno, a menos que resista com teste de PRE.',
-    loot:[]
+    loot:[] // PROGRAMAR CONDICIONAL PARA ENCERRAR O JOGO AO COLETAR A CHAVE
   }
 };
 

@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>DELVE6</title>
+<style>
+
+@font-face { font-family:'Anton'; src:url('fonts/Anton-Regular.ttf'); }
+@font-face { font-family:'Plex'; src:url('fonts/IBMPlexMono-Regular.ttf'); font-weight:400; }
+@font-face { font-family:'Plex'; src:url('fonts/IBMPlexMono-Medium.ttf'); font-weight:500; }
+@font-face { font-family:'Plex'; src:url('fonts/IBMPlexMono-SemiBold.ttf'); font-weight:600; }
+@font-face { font-family:'Plex'; src:url('fonts/IBMPlexMono-Bold.ttf'); font-weight:700; }
+@font-face { font-family:'Plex'; src:url('fonts/IBMPlexMono-Italic.ttf'); font-weight:400; font-style:italic; }
+@font-face { font-family:'Spectral'; src:url('fonts/Spectral-Regular.ttf'); font-weight:400; }
+@font-face { font-family:'Spectral'; src:url('fonts/Spectral-Medium.ttf'); font-weight:500; }
+@font-face { font-family:'Spectral'; src:url('fonts/Spectral-SemiBold.ttf'); font-weight:600; }
+@font-face { font-family:'Spectral'; src:url('fonts/Spectral-Bold.ttf'); font-weight:700; }
+@font-face { font-family:'Spectral'; src:url('fonts/Spectral-Italic.ttf'); font-weight:400; font-style:italic; }
+@font-face { font-family:'Spectral'; src:url('fonts/Spectral-BoldItalic.ttf'); font-weight:700; font-style:italic; }
+
+:root{
+  --bg:#0b0b0a;
+  --panel:#161410;
+  --line:#3a352b;
+  --acid:#d7ff3d;
+  --blood:#e8342a;
+  --bone:#e9e4d3;
+  --dim:#948d78;
+  --purple:#b98bf0;
+  --paper:#efe8d6;
+  --ink:#211c15;
+  --ink-dim:#7c7461;
+  --ink-line:#c7bda1;
+  --ink-accent:#8a2f26;
+}
+
+* { box-sizing:border-box; }
+
+@page{
+  size:148mm 210mm;
+  margin:24mm 15mm 20mm 15mm;
+  background:var(--bg);
+  @top-center{ content: string(chap); font-family:'Plex'; font-size:7.5pt; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; }
+  @bottom-center{ content: "— " counter(page) " —"; font-family:'Plex'; font-size:8pt; color:var(--acid); }
+}
+@page cover{ size:148mm 210mm; margin:0; background:var(--bg); }
+@page divider{ size:148mm 210mm; margin:0; background:var(--bg); }
+@page nohead{
+  size:148mm 210mm; margin:24mm 15mm 20mm 15mm; background:var(--bg);
+  @top-center{ content:""; }
+  @bottom-center{ content: "— " counter(page) " —"; font-family:'Plex'; font-size:8pt; color:var(--acid); }
+}
+@page sheet{
+  size:148mm 210mm; margin:22mm 14mm 18mm 14mm; background:var(--paper);
+  @top-center{ content: string(chap); font-family:'Plex'; font-size:7.5pt; letter-spacing:.12em; color:var(--ink-dim); text-transform:uppercase; }
+  @bottom-center{ content: "— " counter(page) " —"; font-family:'Plex'; font-size:8pt; color:var(--ink-accent); }
+}
+
+html,body{ margin:0; padding:0; background:var(--bg); color:var(--bone); font-family:'Plex'; font-size:9.5pt; line-height:1.55; }
+
+h1,h2,h3,h4{ font-family:'Anton'; font-weight:400; text-transform:uppercase; letter-spacing:.02em; color:var(--acid); }
+p{ margin:0 0 3mm; }
+a{ color:inherit; }
+
+/* ---------- cover & dividers ---------- */
+.cover{
+  page:cover; width:148mm; height:210mm; padding:20mm 16mm;
+  display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 92%, var(--blood) 92%, var(--blood) 100%),
+    var(--bg);
+}
+.cover .kicker{ font-family:'Plex'; font-size:8pt; letter-spacing:.3em; color:var(--dim); text-transform:uppercase; margin-bottom:8mm; }
+.cover h1{ font-size:52pt; color:var(--acid); line-height:.85; margin:0; }
+.cover .sub{ font-family:'Anton'; font-size:15pt; color:var(--blood); letter-spacing:.06em; margin-top:4mm; }
+.cover .rule{ width:22mm; height:1pt; background:var(--line); margin:10mm 0; }
+.cover .tagline{ font-family:'Spectral'; font-style:italic; font-size:13pt; color:var(--bone); }
+.cover .foot{ position:absolute; bottom:14mm; font-family:'Plex'; font-size:7.5pt; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
+
+.divider{
+  page:divider; width:148mm; height:210mm; padding:20mm;
+  display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+  break-before:page;
+}
+.divider .numeral{ font-family:'Anton'; font-size:64pt; color:var(--line); line-height:1; }
+.divider h1{ font-size:30pt; margin:2mm 0 6mm; }
+.divider p{ font-family:'Spectral'; font-style:italic; color:var(--dim); font-size:11.5pt; max-width:95mm; }
+
+/* ---------- structure ---------- */
+section.chapter{ break-before:page; }
+.nohead-page{ page:nohead; }
+
+h2.section-title{ font-size:19pt; border-bottom:2px solid var(--acid); padding-bottom:2mm; margin:0 0 5mm; }
+h3.sub-title{ font-size:13pt; color:var(--bone); border-left:3px solid var(--blood); padding-left:3mm; margin:6mm 0 3mm; }
+h4.mini-title{ font-family:'Plex'; font-weight:700; font-size:9.5pt; color:var(--acid); text-transform:uppercase; letter-spacing:.06em; margin:4mm 0 1.5mm; }
+
+.epigraph{ font-family:'Spectral'; font-style:italic; color:var(--dim); font-size:10.5pt; text-align:center; margin:0 0 6mm; }
+.lead{ font-family:'Spectral'; font-size:10.5pt; color:var(--bone); }
+
+ul.plain, ol.plain{ margin:0 0 3mm; padding-left:4.5mm; }
+ul.plain li, ol.plain li{ margin-bottom:1mm; }
+
+.rule-thin{ height:1px; background:var(--line); margin:5mm 0; border:none; }
+
+/* ---------- tip boxes ---------- */
+.tip{ border-left:3px solid var(--acid); padding:1mm 0 1mm 4mm; margin:4mm 0; break-inside:avoid; }
+.tip h4{ margin:0 0 1mm; }
+.tip p{ font-size:9pt; margin:0; }
+.tip.solo{ border-left-color:var(--purple); }
+.tip.solo h4{ color:var(--purple); }
+.tip.rule{ border-left-color:var(--blood); }
+.tip.rule h4{ color:var(--blood); }
+
+/* ---------- dice tables ---------- */
+table.dice{ width:100%; border-collapse:collapse; margin:2mm 0 5mm; break-inside:avoid; }
+table.dice caption{ text-align:left; font-family:'Plex'; font-weight:700; color:var(--acid); text-transform:uppercase; letter-spacing:.05em; font-size:9pt; margin-bottom:1.5mm; caption-side:top; }
+table.dice td{ border-bottom:1px dotted var(--line); padding:1.6mm 0; vertical-align:top; }
+table.dice td.n{ font-family:'Anton'; color:var(--acid); font-size:14pt; width:9mm; text-align:center; border-right:1px solid var(--line); }
+table.dice td.r{ padding-left:3mm; font-size:9pt; }
+table.dice tr:last-child td{ border-bottom:none; }
+
+table.ref{ width:100%; border-collapse:collapse; margin:2mm 0 5mm; font-size:8.8pt; break-inside:avoid; }
+table.ref th{ text-align:left; font-family:'Plex'; font-weight:700; color:var(--acid); text-transform:uppercase; font-size:7.6pt; letter-spacing:.04em; border-bottom:1px solid var(--acid); padding:1mm 2mm 1.5mm 0; }
+table.ref td{ border-bottom:1px dotted var(--line); padding:1.8mm 2mm 1.8mm 0; vertical-align:top; }
+table.ref tr:last-child td{ border-bottom:none; }
+table.ref td.name{ font-weight:600; color:var(--bone); white-space:nowrap; }
+
+/* ---------- class cards ---------- */
+.class-card{ border:1px solid var(--line); background:var(--panel); padding:3.5mm 4mm; margin-bottom:3.5mm; break-inside:avoid; }
+.class-card h3{ font-size:14pt; margin:0 0 0.5mm; }
+.class-card .flavor{ font-family:'Spectral'; font-style:italic; color:var(--dim); font-size:9pt; margin:0 0 2mm; }
+.class-card .perk{ font-size:9pt; }
+.class-card .perk b{ color:var(--bone); font-weight:700; }
+
+/* ---------- stat blocks ---------- */
+.statblock{ border:1px solid var(--blood); background:var(--panel); padding:4.5mm; margin-bottom:5mm; break-inside:avoid; }
+.statblock h3{ color:var(--blood); font-size:17pt; margin:0; }
+.statblock .quote{ font-family:'Spectral'; font-style:italic; color:var(--dim); font-size:9.3pt; border-left:2px solid var(--blood); padding-left:3mm; margin:2.5mm 0 3mm; }
+.statblock .trait{ font-size:9pt; margin-bottom:3mm; }
+.stat-row{ display:flex; gap:2mm; margin-bottom:3mm; }
+.stat-row .stat{ flex:1; border:1px solid var(--line); text-align:center; padding:2mm 0; }
+.stat-row .stat .lab{ display:block; font-size:6.8pt; color:var(--dim); letter-spacing:.05em; }
+.stat-row .stat .val{ font-family:'Anton'; font-size:15pt; color:var(--bone); }
+.statblock .gear{ font-size:8.8pt; color:var(--dim); }
+.statblock .gear b{ color:var(--bone); font-weight:600; }
+
+/* ---------- warning / lore box ---------- */
+.warning-box{ border:2px solid var(--blood); padding:5mm; margin:3mm 0 6mm; break-inside:avoid; }
+.warning-box .tag{ font-family:'Anton'; color:var(--blood); font-size:8.5pt; letter-spacing:.1em; border:1px solid var(--blood); display:inline-block; padding:1mm 3mm; margin-bottom:3.5mm; }
+.warning-box .lore p{ font-family:'Spectral'; font-style:italic; color:var(--bone); font-size:10pt; margin:0 0 3mm; }
+
+/* ---------- TOC ---------- */
+.toc a.line{ display:block; text-decoration:none; color:var(--bone); font-size:9.3pt; padding:1.1mm 0; white-space:nowrap; overflow:hidden; }
+.toc a.line::after{ content: leader(".") target-counter(attr(href), page); color:var(--dim); }
+.toc a.line.hd{ font-family:'Plex'; font-weight:700; color:var(--acid); text-transform:uppercase; letter-spacing:.06em; font-size:8.4pt; margin-top:3mm; }
+.toc a.line.hd::after{ color:var(--acid); }
+
+/* ---------- character sheet ---------- */
+.sheet-grid{ display:flex; gap:3mm; margin-bottom:3mm; }
+.sheet-col{ flex:1; }
+.field{ margin-bottom:2.5mm; }
+.field .lab{ display:block; font-size:6.6pt; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:0.5mm; }
+.field .line{ border-bottom:1px solid var(--dim); height:4.5mm; }
+.box-row{ display:flex; gap:2mm; }
+.attr-box{ flex:1; border:1px solid var(--acid); text-align:center; padding:2mm 0 1.5mm; }
+.attr-box .lab{ font-size:7pt; color:var(--acid); letter-spacing:.06em; }
+.attr-box .writein{ height:8mm; border-bottom:1px solid var(--dim); margin:1mm 3mm 0; }
+.big-box{ flex:1; border:1px solid var(--blood); text-align:center; padding:2mm 0 1.5mm; }
+.big-box .lab{ font-size:7pt; color:var(--blood); letter-spacing:.06em; }
+.big-box .writein{ height:8mm; border-bottom:1px solid var(--dim); margin:1mm 5mm 0; }
+.checklist{ display:flex; flex-wrap:wrap; gap:2mm; }
+.checklist .slot{ width:5mm; height:5mm; border:1px solid var(--dim); display:inline-block; }
+.jewel-row{ display:flex; gap:4mm; align-items:center; }
+.jewel-row .gem{ width:7mm; height:7mm; border:1px solid var(--dim); border-radius:50%; display:inline-block; }
+.notes-lines{ margin-top:2mm; }
+.notes-lines .l{ border-bottom:1px dotted var(--line); height:5.5mm; }
+
+/* ---------- map page ---------- */
+.map-grid{
+  height:150mm; border:1px solid var(--line);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:8mm 8mm;
+  background-color:#0e0d0b;
+}
+.legend{ display:flex; flex-wrap:wrap; gap:3mm 6mm; font-size:8pt; color:var(--dim); margin-top:3mm; }
+
+/* ---------- pencil-and-paper pages (ficha / mapa) ---------- */
+.sheet-page{ page:sheet; background:var(--paper); color:var(--ink); }
+.sheet-page h2.section-title{ color:var(--ink-accent); border-bottom-color:var(--ink-accent); }
+.sheet-page h4.mini-title{ color:var(--ink-accent); }
+.sheet-page p{ color:var(--ink); }
+.sheet-page .lead{ color:var(--ink); }
+.sheet-page .field .lab{ color:var(--ink-dim); }
+.sheet-page .field .line{ border-bottom:1px solid var(--ink); background:#fff; height:6mm; }
+.sheet-page .attr-box{ border-color:var(--ink-accent); background:#fff; }
+.sheet-page .attr-box .lab{ color:var(--ink-accent); }
+.sheet-page .attr-box .writein{ border-bottom:1px solid var(--ink); height:11mm; }
+.sheet-page .big-box{ border-color:var(--ink-accent); background:#fff; }
+.sheet-page .big-box .lab{ color:var(--ink-accent); }
+.sheet-page .big-box .writein{ border-bottom:1px solid var(--ink); height:11mm; }
+.sheet-page .checklist .slot{ border:1px solid var(--ink); background:#fff; width:9mm; height:9mm; }
+.sheet-page .jewel-row .gem{ border:1.5px solid var(--ink); background:#fff; width:9mm; height:9mm; }
+.sheet-page .jewel-row span{ color:var(--ink-dim) !important; }
+.sheet-page .notes-lines .l{ border-bottom:1px solid var(--ink-line); background:#fff; height:7mm; }
+.sheet-page .rule-thin{ background:var(--ink-line); }
+
+.sheet-page .map-grid{
+  height:158mm; border:1px solid var(--ink);
+  background-image:
+    linear-gradient(var(--ink-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink-line) 1px, transparent 1px);
+  background-size:8mm 8mm;
+  background-color:#fff;
+}
+.sheet-page .legend{ color:var(--ink-dim); border-top:1px solid var(--ink-line); padding-top:2.5mm; }
+
+/* ---------- credits ---------- */
+.credits p{ font-size:9pt; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="kicker">Sistema OSR · Um dado · Geração procedural</div>
+  <h1>DELVE6</h1>
+  <div class="sub">+ O COFRE ESQUECIDO</div>
+  <div class="rule"></div>
+  <div class="tagline">Um dado. Uma chance.<br>Caminhos infinitos.</div>
+</div>
+
+<!-- ============ FILOSOFIA ============ -->
+<section class="chapter nohead-page" id="filosofia" style="display:flex;flex-direction:column;justify-content:center;min-height:166mm;">
+  <div style="text-align:center;">
+    <h2 style="border:none;font-size:15pt;letter-spacing:.15em;" >A Filosofia DELVE6</h2>
+    <div class="rule-thin" style="width:18mm;margin:5mm auto;"></div>
+    <p class="epigraph" style="font-size:12.5pt;line-height:2;">
+      Regras devem ser aprendidas em minutos.<br>
+      Aventuras devem emergir através do jogo.<br>
+      Toda Delve deve ser fácil de criar, modificar e compartilhar.<br>
+      As escolhas do jogador importam mais que builds de personagem.<br>
+      O sistema é uma caixa de ferramentas, não um roteiro.
+    </p>
+  </div>
+</section>
+
+<!-- ============ SUMÁRIO ============ -->
+<section class="chapter nohead-page toc" id="sumario">
+  <h2 class="section-title" style="string-set:chap 'Sumário';">Sumário</h2>
+
+  <a class="line hd" href="#manifesto">Manifesto &amp; Introdução</a>
+  <a class="line" href="#oqueedelve">O que é uma "Delve"?</a>
+  <a class="line" href="#crieseudelve">Crie o seu Delve</a>
+
+  <a class="line hd" href="#parte1">Parte I — Sistema Core</a>
+  <a class="line" href="#atributos">Atributos, PV e CA</a>
+  <a class="line" href="#classes">Classes</a>
+  <a class="line" href="#armas">Armas</a>
+  <a class="line" href="#armaduras">Armaduras &amp; Complementos</a>
+  <a class="line" href="#consumiveis">Consumíveis &amp; Veneno</a>
+  <a class="line" href="#combate">Combate</a>
+
+  <a class="line hd" href="#parte2">Parte II — Gerador de Masmorra</a>
+  <a class="line" href="#comofunciona">Como Funciona o Gerador</a>
+  <a class="line" href="#tabelas">Tabelas de Geração</a>
+  <a class="line" href="#regrascentrais">Regras Centrais da Delve</a>
+
+  <a class="line hd" href="#parte3">Parte III — O Cofre Esquecido</a>
+  <a class="line" href="#loremestrar">Lore para Mestrar</a>
+  <a class="line" href="#sobredelve">Sobre Esta Delve</a>
+  <a class="line" href="#bestiario">Bestiário</a>
+
+  <a class="line hd" href="#apendices">Apêndices</a>
+  <a class="line" href="#dicasmestres">Dicas para Mestres</a>
+  <a class="line" href="#jogosolo">Jogando Sozinho</a>
+  <a class="line" href="#fichapersonagem">Ficha de Personagem</a>
+  <a class="line" href="#mapamasmorra">Mapa da Masmorra</a>
+  <a class="line" href="#creditos">Créditos &amp; Licença</a>
+</section>
+
+<!-- ============ MANIFESTO ============ -->
+<section class="chapter" id="manifesto">
+  <h2 class="section-title" style="string-set:chap 'Manifesto'">Manifesto &amp; Introdução</h2>
+  <p class="lead">OSR ultraminimalista com geração procedural de masmorras, onde o mínimo de recurso a ser utilizado é um dado de seis lados, papel e lápis — facilitando campanhas solo.</p>
+
+  <h4 class="mini-title">Manifesto do Sistema</h4>
+  <ol class="plain">
+    <li>Um único dado.</li>
+    <li>Regras mínimas.</li>
+    <li>Geração procedural.</li>
+    <li>Improvisação acima de preparação.</li>
+    <li>Todo módulo pode ser modificado. "Delves" novas podem ser criadas.</li>
+    <li>O mestre é opcional.</li>
+  </ol>
+
+  <p class="epigraph" style="margin-top:6mm;">O livro fornece ferramentas, não histórias prontas.</p>
+</section>
+
+<!-- ============ O QUE É UMA DELVE ============ -->
+<section class="chapter" id="oqueedelve">
+  <h2 class="section-title" style="string-set:chap 'O que é uma Delve?'">O que é uma "Delve"?</h2>
+
+  <h4 class="mini-title">Etimologia</h4>
+  <p>O verbo <i>to delve</i> vem do inglês antigo <i>delfan</i>, que significava: cavar; escavar; abrir um buraco na terra. O termo vem do proto-germânico <i>delbaną</i>, ligado à ideia de escavação.</p>
+  <p>Com o passar dos séculos, o significado evoluiu. Hoje, "to delve" pode significar:</p>
+  <ul class="plain">
+    <li>explorar cuidadosamente;</li>
+    <li>investigar profundamente;</li>
+    <li>mergulhar em um assunto;</li>
+    <li>aventurar-se em um lugar desconhecido.</li>
+  </ul>
+
+  <h4 class="mini-title">Definição</h4>
+  <p>Aqui, uma <b>Delve</b> é uma unidade de aventura no substantivo: qualquer ambiente procedural criado para exploração usando o DELVE6 CORE. Uma Delve pode ser:</p>
+  <ul class="plain">
+    <li>uma masmorra;</li>
+    <li>uma mina;</li>
+    <li>uma fortaleza;</li>
+    <li>uma floresta amaldiçoada;</li>
+    <li>um navio fantasma;</li>
+    <li>uma estação espacial;</li>
+    <li>um bunker nuclear;</li>
+    <li>um laboratório secreto;</li>
+    <li>uma cidade abandonada.</li>
+  </ul>
+  <p>Todos continuam sendo "Delves" — denominações de um aprofundamento procedural.</p>
+</section>
+
+<!-- ============ CRIE O SEU DELVE ============ -->
+<section class="chapter" id="crieseudelve">
+  <h2 class="section-title" style="string-set:chap 'Crie o seu Delve'">Crie o Seu Delve</h2>
+  <p class="lead">Deepening — Aprofundamento.</p>
+  <p>Você pode criar módulos, cenários, monstros, classes, campanhas e adaptações para DELVE6 CORE livremente e gratuitamente. Créditos são apreciados, mas não obrigatórios. Faça algo interessante.</p>
+
+  <div class="tip">
+    <h4>Lembrete</h4>
+    <p>O sistema é livre para modificações, expansões e reinterpretações — no entanto, a premissa original é usar apenas um dado de seis lados. Expandir o sistema de forma desordenada pode demandar o uso de mais dados, embora isso também seja permitido.</p>
+  </div>
+
+  <p class="epigraph" style="margin-top:8mm;font-size:13pt;">Hack it. Expand it. Publish it.</p>
+</section>
+
+<!-- ============ PARTE I DIVIDER ============ -->
+<div class="divider" id="parte1">
+  <div class="numeral">I</div>
+  <h1>Sistema Core</h1>
+  <p>Atributos, classes e combate — regras que cabem em poucas páginas, e ainda assim bastam.</p>
+</div>
+
+<!-- ============ ATRIBUTOS ============ -->
+<section class="chapter" id="atributos">
+  <h2 class="section-title" style="string-set:chap 'Atributos, PV e CA'">Atributos, PV e CA</h2>
+
+  <table class="ref">
+    <tr><th>Mod.</th><th>Determina</th></tr>
+    <tr><td class="name">FOR</td><td>Dano base de ataques e testes de força.</td></tr>
+    <tr><td class="name">AGL</td><td>CA base (esquiva) e chance de acertar ataques, entre outros testes de agilidade.</td></tr>
+    <tr><td class="name">PRE</td><td>Presença: carisma, coragem, inteligência e poder mágico.</td></tr>
+    <tr><td class="name">DUR</td><td>Dureza: determina pontos de vida (DUR + d6).</td></tr>
+  </table>
+
+  <h4 class="mini-title">Distribuição inicial</h4>
+  <p>Distribua entre os quatro modificadores os valores <b>3, 2, 1, 0</b> — sem repetição.</p>
+  <p class="epigraph" style="text-align:left;">Exemplo: FOR 3 · AGL 1 · PRE 0 · DUR 2</p>
+
+  <h4 class="mini-title">Fórmulas</h4>
+  <table class="ref">
+    <tr><th>Fórmula</th><th>Cálculo</th></tr>
+    <tr><td class="name">Pontos de Vida</td><td>PV = DUR + d6</td></tr>
+    <tr><td class="name">Classe de Armadura</td><td>CA = AGL + d6 <i>(some modificadores de armadura à AGL total)</i></td></tr>
+  </table>
+
+  <div class="tip">
+    <h4>Nota de Design</h4>
+    <p>PV e CA são rolados uma única vez, na criação do personagem, e permanecem fixos — só a AGL efetiva (base + armadura) muda se você trocar de equipamento.</p>
+  </div>
+</section>
+
+<!-- ============ CLASSES ============ -->
+<section class="chapter" id="classes">
+  <h2 class="section-title" style="string-set:chap 'Classes'">Classes</h2>
+  <p class="lead">Escolha uma classe pré-definida ou crie classes customizadas. Cada uma das seis a seguir carrega uma perícia própria — a única regra especial que ela precisa.</p>
+
+  <div class="class-card">
+    <h3>Bárbaro</h3>
+    <p class="flavor">Fúria crua e músculo. Prospera perto da morte.</p>
+    <p class="perk"><b>Fúria de Sangue</b> — quando seu PV cai para metade (ou menos) do máximo, seus ataques corpo a corpo causam +2 de dano.</p>
+  </div>
+
+  <div class="class-card">
+    <h3>Cavaleiro</h3>
+    <p class="flavor">Disciplina, aço e um juramento qualquer.</p>
+    <p class="perk"><b>Guarda de Aço</b> — role d6: some o valor à sua CA até o próximo turno. Se o d6 do próximo ataque inimigo for igual, você contra-ataca passivamente. Se você rolou 6, isso também anula um crítico inimigo por completo.</p>
+  </div>
+
+  <div class="class-card">
+    <h3>Mago Elemental</h3>
+    <p class="flavor">Carrega a tempestade nas mãos vazias.</p>
+    <p class="perk"><b>Rajada Elemental</b> — conjure d6 + PRE de dano em um inimigo, ignorando armadura. Recarrega em 3 turnos ou salas caminhadas. Em d6=1, a magia falha e causa 1 de dano a você mesmo.</p>
+  </div>
+
+  <div class="class-card">
+    <h3>Warlock</h3>
+    <p class="flavor">Vendeu algo. Não fala sobre o quê.</p>
+    <p class="perk"><b>Pacto Sombrio</b> — seu próximo ataque terá vantagem (isso também anula a desvantagem da escuridão), e um crítico inimigo nesse meio-tempo é anulado. Recarrega em 3 turnos ou salas caminhadas.</p>
+  </div>
+
+  <div class="class-card">
+    <h3>Ladino</h3>
+    <p class="flavor">Já estava atrás de você antes de você notar.</p>
+    <p class="perk"><b>Golpe Furtivo</b> — o primeiro ataque de cada combate rola com vantagem (2d6, usa o maior). Começa o jogo com um frasco de Veneno Raro.</p>
+  </div>
+
+  <div class="class-card">
+    <h3>Caçador</h3>
+    <p class="flavor">A distância certa é a que o inimigo nunca vê.</p>
+    <p class="perk"><b>Mira Certeira</b> — ataques com Arco nunca erram e causam +1 de dano fixo.</p>
+  </div>
+</section>
+
+<!-- ============ ARMAS ============ -->
+<section class="chapter" id="armas">
+  <h2 class="section-title" style="string-set:chap 'Armas'">Equipamento — Armas</h2>
+  <p class="lead">Após escolher classe e definir modificadores, escolha o equipamento inicial.</p>
+
+  <table class="ref">
+    <tr><th>Arma</th><th>Dano</th><th>Requisito</th></tr>
+    <tr><td class="name">Desarmado</td><td>Apenas FOR</td><td>—</td></tr>
+    <tr><td class="name">Cajado</td><td>d6 + 0</td><td>—</td></tr>
+    <tr><td class="name">Adaga</td><td>d6 + 1</td><td>—</td></tr>
+    <tr><td class="name">Espada Curta</td><td>d6 + 2</td><td>—</td></tr>
+    <tr><td class="name">Espada Longa</td><td>d6 + 3</td><td>FOR ≥ 2</td></tr>
+    <tr><td class="name">Martelo de Guerra</td><td>d6 + 4</td><td>FOR ≥ 3</td></tr>
+    <tr><td class="name">Arco</td><td>d6 + 1</td><td>AGL ≥ 2</td></tr>
+  </table>
+
+  <div class="tip rule">
+    <h4>Regra especial — Arco</h4>
+    <p>Em um crítico (d6=6), o Arco rola o dado de dano duas vezes e usa o maior resultado.</p>
+  </div>
+
+  <div class="tip rule">
+    <h4>Regra especial — Cajado</h4>
+    <p>Uso exclusivo do Mago Elemental. O Cajado soma +2 de PRE enquanto equipado — relevante para a Rajada Elemental e testes de PRE.</p>
+  </div>
+</section>
+
+<!-- ============ ARMADURAS ============ -->
+<section class="chapter" id="armaduras">
+  <h2 class="section-title" style="string-set:chap 'Armaduras'">Equipamento — Armaduras</h2>
+
+  <table class="ref">
+    <tr><th>Armadura</th><th>Redução de dano</th><th>Mod. AGL</th><th>Requisito</th></tr>
+    <tr><td class="name">Capuz</td><td>-0</td><td>+2 AGL</td><td>—</td></tr>
+    <tr><td class="name">Armadura de Couro</td><td>-1</td><td>+1 AGL</td><td>—</td></tr>
+    <tr><td class="name">Armadura Bárbara</td><td>-2</td><td>—</td><td>—</td></tr>
+    <tr><td class="name">Armadura de Placas</td><td>-3</td><td>-1 AGL</td><td>FOR ≥ 2</td></tr>
+  </table>
+
+  <p style="font-size:8.8pt;color:var(--dim);">A redução de dano se aplica à armadura do <i>alvo</i> ao receber um golpe; o modificador de AGL entra direto no cálculo de CA e nas rolagens de ataque de quem a veste.</p>
+
+  <h4 class="mini-title">Complementos de Build</h4>
+  <p style="font-size:8.8pt;color:var(--dim);">Opcional — recomendado para hacks e versões estendidas.</p>
+  <table class="ref">
+    <tr><th>Slot</th><th>Limite</th></tr>
+    <tr><td class="name">Mãos <i>(ex: manoplas)</i></td><td>1 por vez</td></tr>
+    <tr><td class="name">Pés <i>(ex: botas)</i></td><td>1 por vez</td></tr>
+    <tr><td class="name">Cabeça <i>(ex: elmo)</i></td><td>1 por vez</td></tr>
+    <tr><td class="name">Anéis</td><td>até 4</td></tr>
+    <tr><td class="name">Colares</td><td>até 1</td></tr>
+    <tr><td class="name">Talismãs</td><td>até 1</td></tr>
+  </table>
+</section>
+
+<!-- ============ CONSUMÍVEIS ============ -->
+<section class="chapter" id="consumiveis">
+  <h2 class="section-title" style="string-set:chap 'Consumíveis'">Consumíveis &amp; Veneno</h2>
+
+  <table class="ref">
+    <tr><th>Item</th><th>Efeito</th></tr>
+    <tr><td class="name">Coquetel Verde</td><td>Cura 1 + d6 de PV.</td></tr>
+    <tr><td class="name">Lockpick <i>(2)</i></td><td>Testa AGL para abrir portas sem forçar. Gasta 1 ao usar.</td></tr>
+    <tr><td class="name">Tocha</td><td>Reduz desvantagem em salas escuras e revela itens ocultos. Dura d6 salas/movimentações.</td></tr>
+  </table>
+
+  <div class="tip rule">
+    <h4>Veneno Raro (exclusivo do Ladino)</h4>
+    <p>Ao usar, imbui a arma equipada. Após um golpe cujo dano <b>penetre a armadura</b> do alvo, o veneno consome 1 PV por turno. Guarda Esqueleto é imune. Não pode ser usado em Cajado ou Martelo de Guerra; com o Arco, o efeito se perde caso o ataque erre — o veneno se vai junto com a flecha.</p>
+  </div>
+
+  <div class="tip">
+    <h4>Consumíveis em combate</h4>
+    <p>Usar qualquer consumível — Coquetel, Tocha ou Veneno — gasta o turno inteiro.</p>
+  </div>
+</section>
+
+<!-- ============ COMBATE ============ -->
+<section class="chapter" id="combate">
+  <h2 class="section-title" style="string-set:chap 'Combate'">Combate</h2>
+
+  <table class="ref">
+    <tr><th>Ação</th><th>Fórmula</th></tr>
+    <tr><td class="name">Acerto</td><td>AGL + d6 vs CA do alvo</td></tr>
+    <tr><td class="name">Dano</td><td>FOR + d6 + n(arma) − armadura do alvo</td></tr>
+    <tr><td class="name">Iniciativa</td><td>d6 — acima de 3, jogador primeiro; 3 ou menos, inimigo primeiro</td></tr>
+    <tr><td class="name">Fugir</td><td>AGL vs CA do inimigo</td></tr>
+  </table>
+
+  <div class="tip rule">
+    <h4>Crítico</h4>
+    <p>Um d6 natural = 6 na rolagem de acerto é sempre um crítico: acerto automático, ignorando a CA <b>e</b> a armadura do alvo ao aplicar dano.</p>
+  </div>
+
+  <div class="tip rule">
+    <h4>Lutando no escuro</h4>
+    <p>Sem uma tocha acesa, toda rolagem de ataque em uma sala escura sofre desvantagem: role dois d6 e use o menor.</p>
+  </div>
+
+  <h4 class="mini-title">Vencer uma luta</h4>
+  <p>Ao derrotar um inimigo: recolha um item do seu equipamento e role d6 novamente para gerar um novo evento na mesma sala (outro encontro, ou loot). Se a sala for escura, é preciso acender uma tocha para coletar qualquer item.</p>
+</section>
+
+<!-- ============ PARTE II DIVIDER ============ -->
+<div class="divider" id="parte2">
+  <div class="numeral">II</div>
+  <h1>Gerador de Masmorra</h1>
+  <p>Sete rolagens. Uma masmorra inteira. Nenhuma preparação necessária.</p>
+</div>
+
+<!-- ============ COMO FUNCIONA ============ -->
+<section class="chapter" id="comofunciona">
+  <h2 class="section-title" style="string-set:chap 'Como Funciona o Gerador'">Como Funciona o Gerador</h2>
+  <p class="lead">O algoritmo a seguir gera "O Cofre Esquecido", o módulo introdutório de DELVE6 — mas pode ser adaptado para qualquer Delve.</p>
+  <p>Ele transforma rolagens de d6 em uma masmorra jogável, sala por sala, sem preparo algum. Não substitui a criatividade — substitui a preparação. Cada resultado é um convite para interpretar, não uma sentença fixa.</p>
+
+  <div class="tip">
+    <h4>O que este módulo não inclui</h4>
+    <p>Sistema de retorno à superfície, loja ou acampamento entre incursões. Ficam livres para você adicionar — ou para deixar de fora, numa única descida sem volta, até o fim.</p>
+  </div>
+</section>
+
+<!-- ============ TABELAS DE GERAÇÃO ============ -->
+<section class="chapter" id="tabelas">
+  <h2 class="section-title" style="string-set:chap 'Tabelas de Geração'">Tabelas de Geração</h2>
+
+  <p class="epigraph" style="text-align:left;font-size:9.5pt;"><b style="color:var(--acid)">INÍCIO — Passo 1:</b> a entrada é sempre fixa.</p>
+
+  <table class="dice">
+    <caption>Passo 2 — Área Inicial (d6)</caption>
+    <tr><td class="n">1</td><td class="r">Saguão</td></tr>
+    <tr><td class="n">2</td><td class="r">Corredor</td></tr>
+    <tr><td class="n">3</td><td class="r">Hub</td></tr>
+    <tr><td class="n">4</td><td class="r">Escadaria abaixo</td></tr>
+    <tr><td class="n">5</td><td class="r">Poço com corda</td></tr>
+    <tr><td class="n">6</td><td class="r">Elevador para baixo</td></tr>
+  </table>
+
+  <table class="dice">
+    <caption>Passo 3 — O que Há ao Fundo (d6)</caption>
+    <tr><td class="n">1</td><td class="r">Passagem aberta</td></tr>
+    <tr><td class="n">2</td><td class="r">Porta de madeira, destrancada</td></tr>
+    <tr><td class="n">3</td><td class="r">Porta de madeira trancada (CA 5)</td></tr>
+    <tr><td class="n">4</td><td class="r">Porta de ferro trancada (CA 8)</td></tr>
+    <tr><td class="n">5</td><td class="r">Portão rúnico — exige a inserção de três joias</td></tr>
+    <tr><td class="n">6</td><td class="r">Bifurcação — role novamente para cada caminho</td></tr>
+  </table>
+
+  <div class="tip rule">
+    <h4>Limite de exploração às cegas</h4>
+    <p>"Explorar uma nova direção às cegas" só é possível uma única vez por sala — exceto a partir da Entrada, em caso de bloqueio total de rotas (critério do jogador ou do GM, não havendo limite definido para gerar novas rotas a partir da Entrada). Se a sala for escura, uma nova rota só pode ser explorada com uma tocha acesa.</p>
+  </div>
+
+  <table class="dice">
+    <caption>Passo 4 — Nova Área (d6)</caption>
+    <tr><td class="n">1</td><td class="r">Corredor circular</td></tr>
+    <tr><td class="n">2</td><td class="r">Corredor sem saída</td></tr>
+    <tr><td class="n">3</td><td class="r">Escada espiral</td></tr>
+    <tr><td class="n">4</td><td class="r">Corredor com armadilhas <i>(teste AGL + d6 vs CA 7 para evitar)</i></td></tr>
+    <tr><td class="n">5</td><td class="r">Sala escura <i>(desvantagem sem tocha em todos os testes dentro dela)</i></td></tr>
+    <tr><td class="n">6</td><td class="r">Prisão</td></tr>
+  </table>
+
+  <table class="dice">
+    <caption>Passo 5 — Evento (d6)</caption>
+    <tr><td class="n">1</td><td class="r">Encontro com Guarda Esqueleto</td></tr>
+    <tr><td class="n">2</td><td class="r">Encontro com Kobold</td></tr>
+    <tr><td class="n">3</td><td class="r">Nada acontece</td></tr>
+    <tr><td class="n">4</td><td class="r">Encontra ouro (d6)</td></tr>
+    <tr><td class="n">5</td><td class="r">Encontra 1 consumível</td></tr>
+    <tr><td class="n">6</td><td class="r">Encontra 1 joia (amarela, vermelha ou azul)</td></tr>
+  </table>
+
+  <div class="tip">
+    <h4>Passo 6 — Repetir</h4>
+    <p>Repita os passos 3, 4 e 5 para cada exploração às cegas, até conseguir abrir o Portão Rúnico. Voltar para salas já exploradas é permitido — mas um d6 determina o ressurgimento de inimigos (valores baixos trazem encontros de volta).</p>
+  </div>
+
+  <p class="epigraph" style="text-align:left;font-size:9.5pt;"><b style="color:var(--blood)">Passo 7 — FIM:</b> enfrente o chefe (Ciclope) para alcançar o Tesouro e sair da masmorra.</p>
+</section>
+
+<!-- ============ REGRAS CENTRAIS ============ -->
+<section class="chapter" id="regrascentrais">
+  <h2 class="section-title" style="string-set:chap 'Regras Centrais da Delve'">Regras Centrais da Delve</h2>
+
+  <div class="tip rule">
+    <h4>Movimentação</h4>
+    <p>Mover só é permitido em salas adjacentes. Revisitar uma sala já explorada rola d6 — valores baixos retornam encontros com inimigos comuns (ex.: 1 = Kobold, 2 = Guarda Esqueleto).</p>
+  </div>
+
+  <div class="tip rule">
+    <h4>Tochas e Salas Escuras</h4>
+    <p>Acender uma tocha (durabilidade d6 salas/movimentações) em uma sala escura que indica "algo brilhando" permite coletar o item escondido: role d6 — 1 a 3, um consumível; 4 a 6, uma joia.</p>
+  </div>
+
+  <div class="tip rule">
+    <h4>Coletar Joias</h4>
+    <p>Apenas uma joia de cada cor é coletável em toda a Delve (amarela, azul e vermelha). Notifique narrativamente sempre que uma joia for encontrada.</p>
+  </div>
+
+  <div class="tip rule">
+    <h4>Portas Trancadas</h4>
+    <p>Além de usar lockpicks (AGL vs CA da porta), arrombar com força bruta (FOR vs CA da porta) é permitido — mas rola d6 de dano como punição em caso de falha.</p>
+  </div>
+
+  <div class="tip">
+    <h4>Hacks</h4>
+    <p>Altere qualquer elemento deste algoritmo para criar novas masmorras. Troque os resultados das tabelas, adicione novas, remova as que não servem à sua Delve.</p>
+  </div>
+</section>
+
+<!-- ============ PARTE III DIVIDER ============ -->
+<div class="divider" id="parte3">
+  <div class="numeral">III</div>
+  <h1>O Cofre Esquecido</h1>
+  <p>Perdido.<br>Selado.<br>À espera da descida.</p>
+</div>
+
+<!-- ============ LORE PARA MESTRAR ============ -->
+<section class="chapter" id="loremestrar">
+  <h2 class="section-title" style="string-set:chap 'Lore para Mestrar'">Lore para Mestrar</h2>
+
+  <div class="warning-box">
+    <div class="tag">Leitura não recomendada para jogadores novos</div>
+    <div class="lore">
+      <p>Há muito tempo, uma ordem desconhecida construiu um Vault para guardar algo que jamais deveria ser perdido... ou encontrado.</p>
+      <p>Seus guardas juraram protegê-lo até a morte.</p>
+      <p>O juramento foi cumprido literalmente.</p>
+      <p>Os kobolds saqueiam tudo o que conseguem.</p>
+      <p>E nas profundezas, um velho carcereiro continua esperando diante da última porta...</p>
+      <p>Sem lembrar quem era.</p>
+      <p>Sem lembrar o que guarda.</p>
+      <p>Apenas lembrando que ninguém deve passar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOBRE ESTA DELVE ============ -->
+<section class="chapter" id="sobredelve">
+  <h2 class="section-title" style="string-set:chap 'Sobre Esta Delve'">Sobre Esta Delve</h2>
+  <p class="lead">Quatro perguntas centrais. Respondê-las dará sentido a todos os inimigos, itens e ao chefe — mesmo que o resto seja gerado por dados.</p>
+
+  <ol class="plain" style="font-family:'Plex';font-weight:600;color:var(--acid);">
+    <li>Quem construiu?</li>
+    <li>Para quê?</li>
+    <li>O que deu errado?</li>
+    <li>O que permaneceu?</li>
+  </ol>
+
+  <h4 class="mini-title">Exemplo de interpretação</h4>
+  <div class="warning-box" style="border-color:var(--line);">
+    <div class="lore">
+      <p>Não era uma masmorra.</p>
+      <p>Era um cofre.</p>
+      <p>Um cofre construído por uma civilização antiga.</p>
+      <p>Dentro dele existe algo valioso...</p>
+      <p>...mas ninguém lembra mais o quê.</p>
+    </div>
+  </div>
+
+  <table class="dice">
+    <caption>O Tesouro (d6) — defina livremente ou role</caption>
+    <tr><td class="n">1</td><td class="r">Ouro</td></tr>
+    <tr><td class="n">2</td><td class="r">Uma coroa</td></tr>
+    <tr><td class="n">3</td><td class="r">Um deus preso</td></tr>
+    <tr><td class="n">4</td><td class="r">Um ovo de dragão</td></tr>
+    <tr><td class="n">5</td><td class="r">Uma espada</td></tr>
+    <tr><td class="n">6</td><td class="r">Uma biblioteca</td></tr>
+  </table>
+</section>
+
+<!-- ============ BESTIÁRIO ============ -->
+<section class="chapter" id="bestiario">
+  <h2 class="section-title" style="string-set:chap 'Bestiário'">Bestiário</h2>
+
+  <div class="statblock">
+    <h3>Guarda Esqueleto</h3>
+    <p class="quote">"Quem morre jurando proteger o Vault nunca descansa."</p>
+    <div class="stat-row">
+      <div class="stat"><span class="lab">FOR</span><span class="val">1</span></div>
+      <div class="stat"><span class="lab">AGL</span><span class="val">2</span></div>
+      <div class="stat"><span class="lab">PRE</span><span class="val">0</span></div>
+      <div class="stat"><span class="lab">DUR</span><span class="val">3</span></div>
+    </div>
+    <p class="trait"><b>PV:</b> DUR + d6 · <b>CA:</b> AGL + d6<br><b>Traço:</b> imune a veneno; ao cair a 0 PV pela primeira vez, reergue-se com metade da vida total (+1 se ímpar).</p>
+    <p class="gear"><b>Equipamento:</b> Espada Enferrujada (d6+1) · Armadura Enferrujada (-d1)</p>
+  </div>
+
+  <div class="statblock">
+    <h3>Kobold</h3>
+    <p class="quote">"Não são habitantes. São saqueadores."</p>
+    <div class="stat-row">
+      <div class="stat"><span class="lab">FOR</span><span class="val">2</span></div>
+      <div class="stat"><span class="lab">AGL</span><span class="val">3</span></div>
+      <div class="stat"><span class="lab">PRE</span><span class="val">0</span></div>
+      <div class="stat"><span class="lab">DUR</span><span class="val">1</span></div>
+    </div>
+    <p class="trait"><b>PV:</b> DUR + d6 · <b>CA:</b> AGL + d6<br><b>Traço:</b> 1 em 6 de chance de aparar um ataque passivamente — anula o dano e contra-ataca com teste vs CA.</p>
+    <p class="gear"><b>Equipamento:</b> Escudo de Madeira (-d1) · Maça (d6+2)</p>
+  </div>
+
+  <div class="statblock">
+    <h3>Ciclope <span style="font-size:9pt;color:var(--dim);">— chefe</span></h3>
+    <p class="quote">"Esqueceu o próprio nome. Esqueceu por que está ali. Mas ainda sabe uma única coisa. Ninguém entra."</p>
+    <div class="stat-row">
+      <div class="stat"><span class="lab">FOR</span><span class="val">3</span></div>
+      <div class="stat"><span class="lab">AGL</span><span class="val">3</span></div>
+      <div class="stat"><span class="lab">PRE</span><span class="val">3</span></div>
+      <div class="stat"><span class="lab">DUR</span><span class="val">6</span></div>
+    </div>
+    <p class="trait"><b>PV:</b> DUR + d6 · <b>CA:</b> AGL + d6<br><b>Traço:</b> 1 em 6 de chance de um grito amedrontar e cancelar 1 turno do jogador (teste de PRE resiste).</p>
+    <p class="gear"><b>Equipamento:</b> Chave Gigantesca (d6+4) · Capuz (+2 AGL)</p>
+  </div>
+</section>
+
+<!-- ============ DICAS PARA MESTRES ============ -->
+<div class="divider" id="apendices" style="min-height:0;height:auto;padding:0;">
+</div>
+<section class="chapter" id="dicasmestres">
+  <h2 class="section-title" style="string-set:chap 'Dicas para Mestres'">Dicas para Mestres</h2>
+
+  <div class="tip">
+    <h4>O mestre interpreta, não bloqueia</h4>
+    <p>As tabelas geram o esqueleto. Seu trabalho é vestir a carne. Um "corredor com armadilhas" pode ser lâminas escondidas, piso que cede, ou um gás que ninguém vê chegar — o dado decide que existe, você decide como ela mata.</p>
+  </div>
+
+  <div class="tip">
+    <h4>Prepare menos do que parece necessário</h4>
+    <p>Você pode gerar a masmorra inteira antes da sessão, ou sala por sala, ao vivo, junto dos jogadores. As duas formas são válidas. Gerar ao vivo garante que nem você sabe o que vem a seguir — e isso é uma vantagem, não uma falha.</p>
+  </div>
+
+  <div class="tip">
+    <h4>As quatro perguntas são sua ferramenta mais forte</h4>
+    <p>Quem construiu? Para quê? O que deu errado? O que permaneceu? Responda antes de abrir a sessão, e cada sala gerada aleatoriamente vai parecer parte de uma história — mesmo sem ter sido escrita como uma.</p>
+  </div>
+
+  <div class="tip">
+    <h4>Reaproveite tudo</h4>
+    <p>Um kobold de hoje é um bandido amanhã. Um Ciclope pode virar um autômato de bronze na sua próxima Delve. As mecânicas são o esqueleto; a pele é sua.</p>
+  </div>
+
+  <div class="tip">
+    <h4>Ajuste a dificuldade pelos números, não pelas regras</h4>
+    <p>Precisa de uma masmorra mais dura? Suba DUR e FOR dos inimigos, ou exija mais de três joias. Precisa de algo mais gentil? Reduza. As fórmulas não mudam — só os números que entram nelas.</p>
+  </div>
+
+  <div class="tip">
+    <h4>Deixe o jogador perder</h4>
+    <p>Um personagem pode morrer. Isso é parte do formato. A queda não é punição — é o fim de uma história e o começo de outra.</p>
+  </div>
+
+  <div class="tip">
+    <h4>O mestre é opcional, não proibido</h4>
+    <p>Nada aqui impede uma mesa tradicional. Use as tabelas como inspiração, quebre a ordem delas, adicione NPCs, facções, prazos. O sistema é uma caixa de ferramentas — use quantas ferramentas quiser.</p>
+  </div>
+</section>
+
+<!-- ============ JOGANDO SOZINHO ============ -->
+<section class="chapter" id="jogosolo">
+  <h2 class="section-title" style="string-set:chap 'Jogando Sozinho'">Jogando Sozinho</h2>
+
+  <div class="tip solo">
+    <h4>O gerador é o seu mestre</h4>
+    <p>Cada rolagem nas tabelas do Gerador de Masmorra substitui uma decisão que, em outra mesa, caberia a um mestre. Confie nele. Jogue com o resultado, mesmo quando for estranho.</p>
+  </div>
+
+  <div class="tip solo">
+    <h4>Registre tudo como um diário</h4>
+    <p>Anote cada sala, cada dado, cada escolha, como se fosse o diário de alguém que talvez não saia vivo dali. Releia depois — a masmorra vira uma história só sua, escrita por acaso.</p>
+  </div>
+
+  <div class="tip solo">
+    <h4>Use o dado para perguntas que as tabelas não respondem</h4>
+    <p>Nem tudo está nas tabelas. "Esse guarda está sozinho?" "A porta range?" Faça a pergunta, role um d6: decida antes de rolar (nunca depois) o que valores baixos e altos significam. Esse é o coração da improvisação solo.</p>
+  </div>
+
+  <div class="tip solo">
+    <h4>Defina um ponto de parada antes de começar</h4>
+    <p>Decida, antes da sessão, quando você vai parar: ao conseguir duas joias, ao ficar com PV abaixo da metade, ou depois de um número fixo de salas. Isso transforma uma sessão sem fim em uma história com começo, meio e fim.</p>
+  </div>
+
+  <div class="tip solo">
+    <h4>A morte não é o fim do jogo</h4>
+    <p>Perdeu o personagem? Agora você tem uma nova Delve para explorar — e uma pergunta interessante: o que a masmorra fez com o corpo do último a tentar?</p>
+  </div>
+
+  <div class="tip solo">
+    <h4>No papel ou na tela</h4>
+    <p>Este livro tem tudo que você precisa para jogar solo com papel, lápis e um d6. Se preferir automatizar rolagens, mapa e registro de combate, a versão digital de DELVE6 roda inteira no navegador, sem instalação.</p>
+  </div>
+</section>
+
+<!-- ============ FICHA DE PERSONAGEM ============ -->
+<section class="chapter sheet-page" id="fichapersonagem">
+  <h2 class="section-title" style="string-set:chap 'Ficha de Personagem'">Ficha de Personagem</h2>
+
+  <div class="sheet-grid">
+    <div class="sheet-col" style="flex:2;">
+      <div class="field"><span class="lab">Nome</span><div class="line"></div></div>
+    </div>
+    <div class="sheet-col">
+      <div class="field"><span class="lab">Classe</span><div class="line"></div></div>
+    </div>
+  </div>
+
+  <div class="box-row" style="margin-bottom:3mm;">
+    <div class="attr-box"><div class="lab">FOR</div><div class="writein"></div></div>
+    <div class="attr-box"><div class="lab">AGL</div><div class="writein"></div></div>
+    <div class="attr-box"><div class="lab">PRE</div><div class="writein"></div></div>
+    <div class="attr-box"><div class="lab">DUR</div><div class="writein"></div></div>
+  </div>
+
+  <div class="box-row" style="margin-bottom:4mm;">
+    <div class="big-box"><div class="lab">PV (DUR+d6)</div><div class="writein"></div></div>
+    <div class="big-box"><div class="lab">CA (AGL+d6)</div><div class="writein"></div></div>
+  </div>
+
+  <div class="sheet-grid">
+    <div class="sheet-col"><div class="field"><span class="lab">Arma equipada</span><div class="line"></div></div></div>
+    <div class="sheet-col"><div class="field"><span class="lab">Armadura</span><div class="line"></div></div></div>
+  </div>
+
+  <div class="field"><span class="lab">Perícia de classe</span><div class="line"></div></div>
+
+  <h4 class="mini-title">Mochila <span style="color:var(--dim);font-weight:400;text-transform:none;">(6 espaços)</span></h4>
+  <div class="checklist">
+    <span class="slot"></span><span class="slot"></span><span class="slot"></span>
+    <span class="slot"></span><span class="slot"></span><span class="slot"></span>
+  </div>
+
+  <h4 class="mini-title">Consumíveis</h4>
+  <div class="sheet-grid">
+    <div class="sheet-col"><div class="field"><span class="lab">Coquetel Verde</span><div class="line"></div></div></div>
+    <div class="sheet-col"><div class="field"><span class="lab">Lockpick</span><div class="line"></div></div></div>
+  </div>
+  <div class="sheet-grid">
+    <div class="sheet-col"><div class="field"><span class="lab">Tocha</span><div class="line"></div></div></div>
+    <div class="sheet-col"><div class="field"><span class="lab">Veneno Raro</span><div class="line"></div></div></div>
+  </div>
+
+  <h4 class="mini-title">Joias do Portão Rúnico</h4>
+  <div class="jewel-row">
+    <span class="gem"></span><span style="font-size:8pt;color:var(--dim);">amarela</span>
+    <span class="gem"></span><span style="font-size:8pt;color:var(--dim);">vermelha</span>
+    <span class="gem"></span><span style="font-size:8pt;color:var(--dim);">azul</span>
+  </div>
+
+  <div class="field" style="margin-top:4mm;"><span class="lab">Ouro</span><div class="line"></div></div>
+
+  <h4 class="mini-title">Notas / Diário da Delve</h4>
+  <div class="notes-lines">
+    <div class="l"></div><div class="l"></div><div class="l"></div><div class="l"></div><div class="l"></div>
+  </div>
+</section>
+
+<!-- ============ MAPA DA MASMORRA ============ -->
+<section class="chapter sheet-page" id="mapamasmorra">
+  <h2 class="section-title" style="string-set:chap 'Mapa da Masmorra'">Mapa da Masmorra</h2>
+  <div class="map-grid"></div>
+  <div class="legend">
+    <span>▣ Entrada</span>
+    <span>▢ Sala explorada</span>
+    <span>✕ Beco sem saída</span>
+    <span>▤ Sala escura</span>
+    <span>⛓ Prisão</span>
+    <span>🔒 Porta trancada</span>
+    <span>◆ Portão rúnico</span>
+    <span>☠ Chefe</span>
+  </div>
+</section>
+
+<!-- ============ CRÉDITOS ============ -->
+<section class="chapter" id="creditos">
+  <h2 class="section-title" style="string-set:chap 'Credits & License'">Credits &amp; License</h2>
+
+  <div class="credits">
+    <p><b style="color:var(--acid);">DELVE6 CORE</b> and the introductory Delve <b>The Forgotten Vault</b> were designed and written by <b>Bandeirinha</b>.</p>
+
+    <p>Published by <b>Ashen Desk</b>.</p>
+
+    <div class="rule-thin"></div>
+
+    <p>This book is licensed under the
+      <b>Creative Commons Attribution 4.0 International (CC BY 4.0)</b>.
+      You are free to copy, share, adapt, translate and publish derivative
+      works—including commercial ones—provided appropriate credit is given to
+      the original author.</p>
+
+    <p>The official JavaScript implementation of <b>DELVE6: The Forgotten Vault</b> is released separately under the <b>MIT License</b>.</p>
+
+    <p style="color:var(--dim);">© 2026 Ashen Desk.<br>DELVE6™ and its logo are trademarks of Ashen Desk.</p>
+
+    <div class="rule-thin"></div>
+
+    <p>The official browser edition of <b>DELVE6: The Forgotten Vault</b> includes procedural dungeon generation, automated character sheets, combat and map rendering, requiring no
+      installation.</p>
+
+    <p class="epigraph" style="margin-top:10mm;">Hack it. Expand it. Publish it.</p>
+  </div>
+</section>
+
+</body>
+</html>

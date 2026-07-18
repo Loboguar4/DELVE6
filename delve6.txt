@@ -1,29 +1,10 @@
-Agora faça um livro em pdf baseado no txt enviado, apresentando o sistema e o módulo introdutório (The Forgotten Vault). Deixe elegante e profissional, com ambientação narrativa, índices, fichas e tabelas para jogar em mesa, além de dicas para GM's e jogo solo.
-
-Exemplo de filosofia e manifesto (em português no livro a ser gerado):
-"""
-The DELVE6 Philosophy
-
-Rules should be learned in minutes.
-
-Adventures should emerge through play.
-
-Every Delve should be easy to create, modify and share.
-
-Player choices matter more than character builds.
-
-The system is a toolbox, not a script.
-"""
-
-
-
 DELVE6 CORE
 
 Um dado.
 Uma chance.
 Caminhos infinitos.
 
- OSR ultraminimalista com geração procedural de masmorras. Onde o mínimo de recurso a ser utilizado é um dado de seis lados, papel e caneta, facilitando campanhas solo.
+ OSR ultraminimalista com geração procedural de masmorras. Onde o mínimo de recurso a ser utilizado é um dado de seis lados, papel e lápis, facilitando campanhas solo.
 
 
  MANIFESTO DO SISTEMA:
@@ -128,6 +109,39 @@ FIM
  PORTAS TRANCADAS: Além de usar lockpicks (AGL vs CA da porta), arrombar com força bruta (FOR vs CA da porta) é permitido, mas rola d6 de dano como punição.
 
 
+########### SOBRE A DELVE ############
+
+Quem construiu?
+Para quê?
+O que deu errado?
+O que permaneceu?
+
+
+Essas respostas dão sentido a todos os inimigos, itens e ao chefe.
+
+Exemplo de interpretação:
+
+"Não era uma masmorra.
+
+Era um cofre.
+
+Um cofre construído por uma civilização antiga.
+
+Dentro dele existe algo valioso...
+
+...mas ninguém lembra mais o quê."
+
+
+O tesouro pode ser definido pelo GM ou por um dado d6:
+
+- ouro;
+- uma coroa;
+- um deus preso;
+- um ovo de dragão;
+- uma espada;
+- uma biblioteca.
+
+
 ########### EDITAR E CRIAR DELVES ############
 
  HACKS: Altere elementos do algoritmo para criar novas masmorras.
@@ -145,9 +159,33 @@ Uma masmorra esquecida.
 Uma fortuna perdida.
 Uma única saída.
 
+
+
+LORE BÁSICA PARA MESTRAR - !!!LEITURA NÃO RECOMENDADA PARA JOGADORES NOVOS!!!
+
+"Há muito tempo, uma ordem desconhecida construiu um Vault para guardar algo que jamais deveria ser perdido... ou encontrado.
+
+Seus guardas juraram protegê-lo até a morte.
+
+O juramento foi cumprido literalmente.
+
+Os kobolds saqueiam tudo o que conseguem.
+
+E nas profundezas, um velho carcereiro continua esperando diante da última porta...
+
+Sem lembrar quem era.
+
+Sem lembrar o que guarda.
+
+Apenas lembrando que ninguém deve passar."
+
 --------------------------------------------------------------------------------
 
- CLASSES: Escolha uma classe pré-definida ou crie classes customizadas.
+
+  ######### CLASSES ###########
+
+
+ Escolha uma classe pré-definida ou crie classes customizadas.
 
  6 pré-definidas: Cada uma com uma perk/habilidade própria.
 
@@ -232,10 +270,13 @@ Uma única saída.
 
  INIMIGOS:
 
- Guarda Esqueleto: Imune a veneno e remonta com metade da vida total (+1 se for ímpar) após tombar
- FOR: 2
+ Guarda Esqueleto: Imune a veneno e remonta com metade da vida total (+1 se for ímpar) após tombar.
+
+  "Quem morre jurando proteger o Vault nunca descansa."
+
+ FOR: 1
  AGL: 2
- PRE: 1
+ PRE: 0
  DUR: 3
  PV: dur + d6
  CA: agl + d6
@@ -243,23 +284,30 @@ Uma única saída.
 
 
  Kobold: Chance de parry (1 em 6) passivo, anula dano e contra-ataca com teste vs CA
+
+  "Não são habitantes. São saqueadores."
+
  FOR: 2
  AGL: 3
- PRE: 1
- DUR: 0
+ PRE: 0
+ DUR: 1
  PV: dur + d6
  CA: agl + d6
  Equipamento: Escudo de Madeira (-d1) e Maça (d6 + 2)
 
 
  Ciclope (chefe): Chance de 1 em 6 do grito amedrontar e cancelar 1 turno do jogador (teste de PRE para resistir).
+
+ "Esqueceu o próprio nome. Esqueceu por que está ali. Mas ainda sabe uma única coisa. Ninguém entra."
+
  FOR: 3
- AGL: 1
+ AGL: 3
  PRE: 3
  DUR: 6
  PV: dur + d6
  CA: agl + d6
- Equipamento: Martelo de Guerra e Capuz
+ Equipamento: Chave Gigantesca (d6 +4) e Capuz (+2 AGL)
+
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
