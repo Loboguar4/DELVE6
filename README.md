@@ -181,7 +181,7 @@ Na versão em HTML, classes, armas, armaduras e inimigos vivem em objetos JavaSc
 
 Este projeto interativo em HTML é distribuído sob a **Licença MIT** — veja [`LICENSE`](./LICENSE) para o texto completo.
 
-O livro é licenciado sob Creative Commons Attribution 4.0 International (CC BY 4.0)
+O livro é licenciado sob Creative Commons Attribution 4.0 International (CC BY 4.0).
 
 © 2026 Ashen Desk. DELVE6™ and its logo are trademarks of Ashen Desk
 
