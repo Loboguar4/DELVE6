@@ -155,6 +155,12 @@ button.small{padding:4px 8px;font-size:10.5px;}
   flex:1 1 auto;
 }
 
+#win-log .win-body{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
 #taskbar{
   position:fixed; left:0; right:0; bottom:0;
   background:var(--panel2); border-top:1px solid var(--line);
@@ -217,7 +223,7 @@ button.small{padding:4px 8px;font-size:10.5px;}
 .die.crit{color:var(--blue);}
 
 #log{
-  max-height:280px;overflow-y:auto;font-size:12.5px;
+  flex:1 1 auto;min-height:0;overflow-y:auto;font-size:12.5px;
   display:flex;flex-direction:column;gap:5px;
   border-top:1px dashed var(--line);padding-top:10px;margin-top:6px;
   scroll-behavior:smooth;
@@ -1434,7 +1440,7 @@ const ENEMIES = {
     stats:{FOR:3,AGL:3,PRE:3,DUR:6},
     weaponKey:'chave_gigantesca', armorKey:'capuz',
     trait:'1 em 6 de chance de um bramido: cancela seu próximo turno, a menos que resista com teste de PRE.',
-    loot:[] // PROGRAMAR CONDICIONAL PARA ENCERRAR O JOGO AO COLETAR A CHAVE
+    loot:[{type:'weapon', key:'chave_gigantesca'}]
   }
 };
 
@@ -1905,6 +1911,11 @@ async function winCombat(){
   if(e.boss){
     room.won = true;
     endCombatUI();
+    await sleep(450);
+    logEntry(`<span class="txt good">Você recolhe a <b>Chave Gigantesca</b> do corpo do Ciclope.</span>`,'good');
+    await sleep(550);
+    logEntry(`<span class="txt">"A Chave pesa como um homem adulto, mas sua força é o bastante para girá-la no cofre."</span>`);
+    await sleep(650);
     victory();
     return;
   }
