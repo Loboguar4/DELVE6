@@ -2,7 +2,7 @@
 
 **Um dado. Uma chance. Caminhos infinitos.**
 
-DELVE6 é um sistema OSR ultraminimalista construído em torno de uma única premissa: **tudo se resolve com um d6**. Sem tabelas de múltiplos dados, sem fichas complexas — só um dado de seis lados, papel, lápis, e uma masmorra gerada proceduralmente à sua frente.
+DELVE6 (ou DelveS) é um sistema OSR ultraminimalista construído em torno de uma única premissa: **tudo se resolve com um d6**. Sem tabelas de múltiplos dados, sem fichas complexas — só um dado de seis lados, papel, lápis, e uma masmorra gerada proceduralmente à sua frente.
 
 Este repositório contém o **livro de regras core** (`delve6-book.pdf`) e uma **implementação jogável em navegador** (`index.html`) do primeiro módulo, *The Forgotten Vault*.
 
