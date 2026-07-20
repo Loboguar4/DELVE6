@@ -8,7 +8,7 @@ Este repositório contém o **livro de regras core** (`delve6-book.pdf`) e uma *
 
 ---
 
-## Jogar agora:
+## Jogar agora
 
 <https://loboguar4.github.io/DELVE6/>
 
